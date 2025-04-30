@@ -3,29 +3,38 @@ import Link from "next/link";
 
 const Header = () => {
   return (
-    <nav className="w-full flex items-center justify-between px-8 py-4 shadow-sm border-b bg-white z-50 sticky top-0">
-      <div className="flex items-center gap-2 text-gray-600">
-        <div className="w-8 h-8 bg-gray-300 rounded-full" /> 
-        <h1 className="text-2xl font-bold">
-          <Link href="/" className="hover:text-black transition">Fuel Finder</Link>
-        </h1>
-      </div>
+    <nav className="w-full sticky top-0 z-50 bg-white/40 backdrop-blur-md shadow-sm border-b border-gray-200 px-8 py-4 font-sans text-[#171717]">
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
+        
+        {/* Logo + Name */}
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 bg-[#d8e8d8] rounded-full shadow-sm" />
+          <h1 className="text-2xl font-bold tracking-tight text-[#0f4c81] hover:brightness-110 transition duration-200">
+            <Link href="/">Fuel Finder</Link>
+          </h1>
+        </div>
 
-      <div className="flex items-center gap-8 text-gray-600">
-        <a href="#" className="hover:text-black transition">My Garage</a>
-        <a href="#" className="hover:text-black transition">Placeholder</a>
-        <a href="#" className="hover:text-black transition">Placeholder</a>
-        <a href="#" className="hover:text-black transition">Placeholder</a>
-        <a href="#" className="hover:text-black transition">Placeholder</a>
-      </div>
+        {/* Nav Links */}
+        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-700">
+          <Link href="#" className="hover:brightness-110 hover:scale-105 transition">My Garage</Link>
+          <Link href="#" className="hover:brightness-110 hover:scale-105 transition">Fuel Prices</Link>
+          <Link href="#" className="hover:brightness-110 hover:scale-105 transition">Stations</Link>
+          <Link href="#" className="hover:brightness-110 hover:scale-105 transition">About</Link>
+          <Link href="#" className="hover:brightness-110 hover:scale-105 transition">Help</Link>
+        </div>
 
-      <div className="flex items-center gap-4">
-        <button className="text-gray-600 hover:text-black transition">
-          <a href="/login">Log In</a>
-        </button>
-        <button className="border border-red-500 text-red-500 px-4 py-1 rounded hover:bg-red-50 transition">
-          <a href="/createaccount">Create Account</a>
-        </button>
+        {/* Auth Buttons */}
+        <div className="flex items-center gap-4">
+          <Link href="/login" className="text-[#0f4c81] hover:underline text-sm font-medium">
+            Log In
+          </Link>
+          <Link
+            href="/createaccount"
+            className="bg-[#0f4c81] text-white px-4 py-2 rounded-full shadow-md hover:brightness-110 hover:scale-105 active:scale-95 transition"
+          >
+            Create Account
+          </Link>
+        </div>
       </div>
     </nav>
   );

@@ -1,27 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f9f5e9; 
-  --foreground: #2e2b23; 
-}
+  --background: linear-gradient(to bottom, #f2f5f2, #e0e8e0, #d8e8d8);
+  --foreground: #171717;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: 'Times New Roman', Times, serif;
-  --font-mono: var(--font-geist-mono);
+  --font-sans: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'Geist Mono', monospace;
 }
-
-/* I use dark mode for my browser and i dont feel like turning it off */
-/* @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #1e1c18;
-    --foreground: #e8e6dc;
-  }
-} */
 
 body {
+  @apply antialiased;
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Times New Roman', Times, serif;
+  font-family: var(--font-sans);
 }
