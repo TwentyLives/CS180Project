@@ -1,5 +1,5 @@
 from django.db import models
-from registration.models import User
+from register.models import User
 from stations.models import Fuel
 
 # Create your models here.

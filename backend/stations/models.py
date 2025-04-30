@@ -1,5 +1,5 @@
 from django.db import models
-from registration.models import User
+from register.models import User
 
 # Create your models here.
 class Station(models.Model):
