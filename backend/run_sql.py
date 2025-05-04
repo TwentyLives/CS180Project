@@ -1,5 +1,6 @@
 # backend/run_sql.py
 from django.conf import settings
+from tabulate import tabulate
 import django
 import os
 
@@ -32,23 +33,29 @@ def run_queries():
         # Get the column names of the 'car' table
         cursor.execute("PRAGMA table_info(car);")
         columns = cursor.fetchall()
+        col_names = [col[1] for col in columns]  # Column names are in the second position of each tuple
         print("Columns in 'car' table:")
-        for column in columns:
-            print(column)
-
+        print(tabulate(columns, headers=["cid", "name", "type", "notnull", "dflt_value", "pk"]))
+        
         # Select and display first 5 rows from the car table
         cursor.execute("SELECT * FROM car LIMIT 5;")
         results = cursor.fetchall()
         print("\nRows in 'car' table:")
-        for row in results:
-            print(row)
+        print(tabulate(results, headers=col_names, tablefmt="grid"))
 
-        # Select and display first 5 rows from the user table
+
+        # Get the column names of the 'register_user' table
+        cursor.execute("PRAGMA table_info(register_user);")
+        columns = cursor.fetchall()
+        col_names = [col[1] for col in columns]  # Column names are in the second position of each tuple
+        print("Columns in 'register_user' table:")
+        print(tabulate(columns, headers=["cid", "name", "type", "notnull", "dflt_value", "pk"]))
+        
+        # Select and display first 5 rows from the car table
         cursor.execute("SELECT * FROM register_user LIMIT 5;")
         results = cursor.fetchall()
-        print("\nRows in 'car' table:")
-        for row in results:
-            print(row)
+        print("\nRows in 'register_user' table:")
+        print(tabulate(results, headers=col_names, tablefmt="grid"))
 
         print ("\n")
 
