@@ -19,6 +19,13 @@ def clear_tables():
         cursor.execute("DELETE FROM stations_fuel;")
         cursor.execute("DELETE FROM stations_station;")
 
+        # Reset auto-increment (only needed if any of these tables use AUTOINCREMENT)
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name='register_user';")
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name='car';")
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name='stations_address';")
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name='stations_fuel';")
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name='stations_station';")
+
 def run_queries():
     with connection.cursor() as cursor:
         # Insert user
@@ -26,19 +33,7 @@ def run_queries():
             INSERT INTO register_user (login, password, email, first_name, last_name)
             VALUES ('test_user', 'password', 'test_user@example.com', 'Test', 'User');
         """)
-
-        # Ensure a Fuel entry exists (for fuel_type)
-        # cursor.execute("""
-        #     INSERT OR IGNORE INTO stations_fuel (type, price, station_id)
-        #     VALUES ('Gasoline', 3.50, 1);
-        # """)
-
-        # # Now insert a new car entry
-        # cursor.execute("""
-        #     INSERT INTO car (year, make, model, mpg, owner_id, fuel_type_id)
-        #     VALUES (2020, 'Toyota', 'Corolla', 32.5, (SELECT id FROM auth_user WHERE username='test_user'), 
-        #     (SELECT id FROM stations_fuel WHERE type='Gasoline'));
-        # """)
+        
         print_table("car", cursor)
         print_table("register_user", cursor)
 
