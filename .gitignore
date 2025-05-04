@@ -42,3 +42,15 @@ next-env.d.ts
 
 # backend
 __pycache__/
+
+backend/core/__pycache__
+backend/garage/__pycache__
+backend/map/__pycache__
+backend/register/__pycache__
+backend/stations/__pycache__
+
+backend/core/migrations/__pycache__
+backend/garage/migrations/__pycache__
+backend/map/migrations/__pycache__
+backend/register/migrations/__pycache__
+backend/stations/migrations/__pycache__
