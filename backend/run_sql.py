@@ -10,12 +10,22 @@ django.setup()
 
 from django.db import connection
 
+def clear_tables():
+    # Clear relevant tables before running anything else
+    with connection.cursor() as cursor:
+        cursor.execute("DELETE FROM register_user;")
+        cursor.execute("DELETE FROM car;")
+        cursor.execute("DELETE FROM stations_address;")
+        cursor.execute("DELETE FROM stations_fuel;")
+        cursor.execute("DELETE FROM stations_station;")
+
 def run_queries():
     with connection.cursor() as cursor:
-        # cursor.execute("""
-        #     INSERT INTO register_user (login, password, email, first_name, last_name)
-        #     VALUES ('test_user', 'password', 'test_user@example.com', 'Test', 'User');
-        # """)
+        # Insert user
+        cursor.execute("""
+            INSERT INTO register_user (login, password, email, first_name, last_name)
+            VALUES ('test_user', 'password', 'test_user@example.com', 'Test', 'User');
+        """)
 
         # Ensure a Fuel entry exists (for fuel_type)
         # cursor.execute("""
@@ -54,6 +64,7 @@ def print_all_table_names():
             print(f"- {name}")
 
 if __name__ == "__main__":
+    clear_tables()
     run_queries()
     # print_all_table_names()
 
