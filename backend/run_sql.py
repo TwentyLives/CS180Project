@@ -29,35 +29,22 @@ def run_queries():
         #     VALUES (2020, 'Toyota', 'Corolla', 32.5, (SELECT id FROM auth_user WHERE username='test_user'), 
         #     (SELECT id FROM stations_fuel WHERE type='Gasoline'));
         # """)
-
-        # Get the column names of the 'car' table
-        cursor.execute("PRAGMA table_info(car);")
-        columns = cursor.fetchall()
-        col_names = [col[1] for col in columns]  # Column names are in the second position of each tuple
-        print("Columns in 'car' table:")
-        print(tabulate(columns, headers=["cid", "name", "type", "notnull", "dflt_value", "pk"]))
-        
-        # Select and display first 5 rows from the car table
-        cursor.execute("SELECT * FROM car LIMIT 5;")
-        results = cursor.fetchall()
-        print("\nRows in 'car' table:")
-        print(tabulate(results, headers=col_names, tablefmt="grid"))
-
-
-        # Get the column names of the 'register_user' table
-        cursor.execute("PRAGMA table_info(register_user);")
-        columns = cursor.fetchall()
-        col_names = [col[1] for col in columns]  # Column names are in the second position of each tuple
-        print("Columns in 'register_user' table:")
-        print(tabulate(columns, headers=["cid", "name", "type", "notnull", "dflt_value", "pk"]))
-        
-        # Select and display first 5 rows from the car table
-        cursor.execute("SELECT * FROM register_user LIMIT 5;")
-        results = cursor.fetchall()
-        print("\nRows in 'register_user' table:")
-        print(tabulate(results, headers=col_names, tablefmt="grid"))
+        print_table("car", cursor)
+        print_table("register_user", cursor)
 
         print ("\n")
+
+def print_table(table_name, cursor):
+    # Get the column names of the 'table_name' table
+    cursor.execute(f"PRAGMA table_info({table_name});")
+    columns = cursor.fetchall()
+    col_names = [col[1] for col in columns]  # Column names are in the second position of each tuple
+    
+    # Select and display first 5 rows from the car table
+    cursor.execute(f"SELECT * FROM {table_name} LIMIT 5;")
+    results = cursor.fetchall()
+    print(f"\nRows in '{table_name}' table:")
+    print(tabulate(results, headers=col_names, tablefmt="grid"))
 
 def print_all_table_names():
     with connection.cursor() as cursor:
