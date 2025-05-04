@@ -10,30 +10,13 @@ django.setup()
 
 from django.db import connection
 
-def clear_tables():
-    # Clear relevant tables before running anything else
+def clear_tables(tables):    
     with connection.cursor() as cursor:
-        cursor.execute("DELETE FROM users;")
-        cursor.execute("DELETE FROM cars;")
-        cursor.execute("DELETE FROM address;")
-        cursor.execute("DELETE FROM stations;")
-        cursor.execute("DELETE FROM fuel;")
+        for table_name in tables:
+            cursor.execute(f"DELETE FROM {table_name};")
+            cursor.execute(f"DELETE FROM sqlite_sequence WHERE name='{table_name}';")
 
-        # Reset auto-increment (only needed if any of these tables use AUTOINCREMENT)
-        cursor.execute("DELETE FROM sqlite_sequence WHERE name='users';")
-        cursor.execute("DELETE FROM sqlite_sequence WHERE name='cars';")
-        cursor.execute("DELETE FROM sqlite_sequence WHERE name='address';")
-        cursor.execute("DELETE FROM sqlite_sequence WHERE name='stations';")
-        cursor.execute("DELETE FROM sqlite_sequence WHERE name='fuel';")
-
-        # Reset auto-increment (only needed if any of these tables use AUTOINCREMENT)
-        cursor.execute("DELETE FROM sqlite_sequence WHERE name='register_user';")
-        cursor.execute("DELETE FROM sqlite_sequence WHERE name='car';")
-        cursor.execute("DELETE FROM sqlite_sequence WHERE name='stations_address';")
-        cursor.execute("DELETE FROM sqlite_sequence WHERE name='stations_fuel';")
-        cursor.execute("DELETE FROM sqlite_sequence WHERE name='stations_station';")
-
-def run_queries():
+def run_queries(tables):
     with connection.cursor() as cursor:
         # Insert user
         cursor.execute("""
@@ -41,11 +24,8 @@ def run_queries():
             VALUES ('test_user', 'password', 'test_user@example.com', 'Test', 'User');
         """)
         
-        print_table("cars", cursor)
-        print_table("users", cursor)
-        print_table("address", cursor)
-        print_table("stations", cursor)
-        print_table("fuel", cursor)
+        for table_name in tables:
+            print_table(table_name, cursor)
 
         print ("\n")
 
@@ -68,7 +48,8 @@ def print_all_table_names():
         print(f"- {name}")
 
 if __name__ == "__main__":
-    clear_tables()
-    run_queries()
+    tables = ['users', 'cars', 'address', 'stations', 'fuel']
+    clear_tables(tables)
+    run_queries(tables)
     # print_all_table_names()
 
