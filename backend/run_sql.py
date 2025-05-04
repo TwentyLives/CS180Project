@@ -26,6 +26,13 @@ def clear_tables():
         cursor.execute("DELETE FROM sqlite_sequence WHERE name='stations';")
         cursor.execute("DELETE FROM sqlite_sequence WHERE name='fuel';")
 
+        # Reset auto-increment (only needed if any of these tables use AUTOINCREMENT)
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name='register_user';")
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name='car';")
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name='stations_address';")
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name='stations_fuel';")
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name='stations_station';")
+
 def run_queries():
     with connection.cursor() as cursor:
         # Insert user
