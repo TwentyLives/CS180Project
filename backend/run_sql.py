@@ -13,34 +13,32 @@ from django.db import connection
 def clear_tables():
     # Clear relevant tables before running anything else
     with connection.cursor() as cursor:
-        cursor.execute("DELETE FROM register_user;")
-        cursor.execute("DELETE FROM car;")
-        cursor.execute("DELETE FROM stations_address;")
-        cursor.execute("DELETE FROM stations_fuel;")
-        cursor.execute("DELETE FROM stations_station;")
+        cursor.execute("DELETE FROM users;")
+        cursor.execute("DELETE FROM cars;")
+        cursor.execute("DELETE FROM address;")
+        cursor.execute("DELETE FROM stations;")
+        cursor.execute("DELETE FROM fuel;")
+
+        # Reset auto-increment (only needed if any of these tables use AUTOINCREMENT)
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name='users';")
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name='cars';")
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name='address';")
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name='stations';")
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name='fuel';")
 
 def run_queries():
     with connection.cursor() as cursor:
         # Insert user
         cursor.execute("""
-            INSERT INTO register_user (login, password, email, first_name, last_name)
+            INSERT INTO users (login, password, email, first_name, last_name)
             VALUES ('test_user', 'password', 'test_user@example.com', 'Test', 'User');
         """)
-
-        # Ensure a Fuel entry exists (for fuel_type)
-        # cursor.execute("""
-        #     INSERT OR IGNORE INTO stations_fuel (type, price, station_id)
-        #     VALUES ('Gasoline', 3.50, 1);
-        # """)
-
-        # # Now insert a new car entry
-        # cursor.execute("""
-        #     INSERT INTO car (year, make, model, mpg, owner_id, fuel_type_id)
-        #     VALUES (2020, 'Toyota', 'Corolla', 32.5, (SELECT id FROM auth_user WHERE username='test_user'), 
-        #     (SELECT id FROM stations_fuel WHERE type='Gasoline'));
-        # """)
-        print_table("car", cursor)
-        print_table("register_user", cursor)
+        
+        print_table("cars", cursor)
+        print_table("users", cursor)
+        print_table("address", cursor)
+        print_table("stations", cursor)
+        print_table("fuel", cursor)
 
         print ("\n")
 
@@ -57,11 +55,10 @@ def print_table(table_name, cursor):
     print(tabulate(results, headers=col_names, tablefmt="grid"))
 
 def print_all_table_names():
-    with connection.cursor() as cursor:
-        table_names = connection.introspection.table_names()
-        print("All tables in the database:")
-        for name in table_names:
-            print(f"- {name}")
+    table_names = connection.introspection.table_names()
+    print("All tables in the database:")
+    for name in table_names:
+        print(f"- {name}")
 
 if __name__ == "__main__":
     clear_tables()

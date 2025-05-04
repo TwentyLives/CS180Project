@@ -19,11 +19,13 @@ from django.urls import path
 
 from register import views as register_views
 from garage import views as garage_views
+from stations import views as station_views
 from map import views as map_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('register/', register_views.register, name='register'),
     path('garage/', garage_views.garage, name='garage'),
+    path('stations/', station_views.stations, name='stations'),
     path('map/', map_views.map, name='map'),
 ]
