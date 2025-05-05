@@ -12,15 +12,30 @@ const CreateAccount = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    if (e === null) {
-        alert('Username or password is missing.');
-        return;
-        //this shouldn't be called cause of required but just in case
-    }
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("How JSON form will look", formData);
-    //this is about to be a pain to link up
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/register/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        alert("Account created successfully!");
+        setFormData({ username: "", password: "" }); // Reset form
+      } else {
+        const errorData = await response.json();
+        console.error("Error:", errorData);
+        alert("Failed to create account. Check the console for details.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("An error occurred. Please try again.");
+    }
   };
 
   return (
