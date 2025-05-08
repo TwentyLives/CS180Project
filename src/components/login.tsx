@@ -32,7 +32,7 @@ const Login = () => {
     console.log("Sending login payload:", payload);
 
     try {
-      const res = await fetch("../api/login", {
+      const res = await fetch("http://127.0.0.1:8000/api/login/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -44,7 +44,8 @@ const Login = () => {
         localStorage.setItem("loginData", JSON.stringify(data));
         router.push("/dashboard");
       } else {
-        setPopupMessage("Login failed. Please try again.");
+        const errorData = await res.json();
+        setPopupMessage(errorData.error || "Login failed. Please try again.");
       }
     } catch (err) {
       console.error("Network error:", err);
