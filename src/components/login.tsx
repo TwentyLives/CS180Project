@@ -41,7 +41,7 @@ const Login = () => {
       if (res.ok) {
         const data = await res.json();
         console.log("Login success:", data);
-        localStorage.setItem("loginData", JSON.stringify(data));
+        sessionStorage.setItem("loginData", JSON.stringify(data));
         router.push("/dashboard");
       } else {
         setPopupMessage("Login failed. Please try again.");

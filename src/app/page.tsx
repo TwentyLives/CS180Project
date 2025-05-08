@@ -6,11 +6,15 @@ import Mission from '../components/mission';
 
 const Home = () => {
   return (
-    <div className="flex flex-col items-center justify-center gap-0">
+    <div className="flex flex-col items-center justify-center gap-0 scroll-smooth">
       <Header />
       <Landing />
-      <Mission />
-      <Footer />
+      <div id="mission">
+        <Mission />
+      </div>
+      <div id="footer">
+        <Footer />
+      </div>
     </div>
   );
 };

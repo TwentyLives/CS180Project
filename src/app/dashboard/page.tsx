@@ -1,4 +1,4 @@
-import Header from '../../components/header';
+import Header from '../../components/loggedHeader';
 import Dash from '../../components/dash';
 import Footer from '../../components/footer';
 
