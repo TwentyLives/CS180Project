@@ -8,6 +8,8 @@ import VehicleImage from './VehicleImage';
 import VehicleInfo from './VehicleInfo';
 import ImageCard from './ImageCard';
 import UserTitle from './UserTitle';
+import LogRefuelModal from './LogRefuel';
+import Toast from './Toast'
 
 
 interface GarageVehicle {
@@ -68,6 +70,8 @@ export default function GaragePage() {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [openUpward, setOpenUpward] = useState(false);
   const [isChanging, setIsChanging] = useState(false);
+  const [showRefuelModal, setShowRefuelModal] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -191,6 +195,7 @@ export default function GaragePage() {
         <div className="flex justify-center mt-4">
           <button
             className="bg-[#0f4c81] text-white px-6 py-3 rounded-full text-base font-medium shadow-md hover:brightness-110 hover:scale-105 active:scale-95 transition-all"
+            onClick={() => setShowRefuelModal(true)}
           >
             Log Refuel +
           </button>
@@ -204,6 +209,24 @@ export default function GaragePage() {
         <div className="mt-6">
           <ImageCard />
         </div>
+
+        <LogRefuelModal
+          isOpen={showRefuelModal}
+          onClose={() => setShowRefuelModal(false)}
+          onSubmit={(data) => {
+            console.log("Refuel data submitted for car:", selectedVehicle.id);
+            console.log(data);
+            setToastMessage("Refuel logged successfully ✅");
+
+
+            // TODO for backend send:
+            // fetch('/api/log-refuel', {
+            //   method: 'POST',
+            //   body: JSON.stringify({ carId: selectedVehicle.id, ...data }),
+            // });
+          }}
+        />
+        {toastMessage && <Toast message={toastMessage} onClose={() => setToastMessage('')} />}
       </div>
 
     </main>
