@@ -1,5 +1,7 @@
 "use client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import Toast from "./toast";
 
 const CreateAccount = () => {
   const [formData, setFormData] = useState({
@@ -7,20 +9,49 @@ const CreateAccount = () => {
     password: "",
   });
 
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const router = useRouter();
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    if (e === null) {
-        alert('Username or password is missing.');
-        return;
-        //this shouldn't be called cause of required but just in case
-    }
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("How JSON form will look", formData);
-    //this is about to be a pain to link up
+
+    if (!formData.username || !formData.password) {
+      setToastMessage("Username or password is missing.");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/register/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        sessionStorage.setItem("loginData", JSON.stringify(data));
+
+        setToastMessage("Account created successfully");
+
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 1500);
+      } else {
+        console.error("Error:", data);
+        setToastMessage("Failed to create account. Check details.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setToastMessage("Network error. Please try again.");
+    }
   };
 
   return (
@@ -72,6 +103,10 @@ const CreateAccount = () => {
           </a>
         </h3>
       </div>
+
+      {toastMessage && (
+        <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
+      )}
     </div>
   );
 };

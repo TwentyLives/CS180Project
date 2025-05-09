@@ -14,9 +14,9 @@ const Header = () => {
         </div>
 
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-700">
-          <Link href="#" className="hover:brightness-110 hover:scale-105 transition">place</Link>
-          <Link href="#" className="hover:brightness-110 hover:scale-105 transition">place</Link>
-          <Link href="#" className="hover:brightness-110 hover:scale-105 transition">place</Link>
+          <Link href="#start" className="hover:brightness-110 hover:scale-105 transition">Start Here</Link>
+          <Link href="#stats" className="hover:brightness-110 hover:scale-105 transition">Stats</Link>
+          <Link href="#tools" className="hover:brightness-110 hover:scale-105 transition">Tools</Link>
           <Link href="#mission" className="hover:brightness-110 hover:scale-105 transition">Our Mission</Link>
           <Link href="#footer" className="hover:brightness-110 hover:scale-105 transition">Contact Us</Link>
         </div>

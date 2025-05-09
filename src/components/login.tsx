@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import Toast from "./toast";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -8,7 +9,9 @@ const Login = () => {
     password: "",
   });
 
-  const [popupMessage, setPopupMessage] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastColor, setToastColor] = useState<"red" | "green">("red");
+
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -20,7 +23,8 @@ const Login = () => {
     e.preventDefault();
 
     if (!formData.username || !formData.password) {
-      setPopupMessage("Username or password is missing.");
+      setToastMessage("Username or password is missing.");
+      setToastColor("red");
       return;
     }
 
@@ -29,10 +33,8 @@ const Login = () => {
       password: formData.password,
     };
 
-    console.log("Sending login payload:", payload);
-
     try {
-      const res = await fetch("../api/login", {
+      const res = await fetch("http://127.0.0.1:8000/api/login/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -40,30 +42,37 @@ const Login = () => {
 
       if (res.ok) {
         const data = await res.json();
-        console.log("Login success:", data);
         sessionStorage.setItem("loginData", JSON.stringify(data));
-        router.push("/dashboard");
+        setToastMessage("Login successful!");
+        setToastColor("green");
+
+        setTimeout(() => {
+          setToastMessage(null);
+          router.push("/dashboard");
+        }, 1500);
       } else {
-        setPopupMessage("Login failed. Please try again.");
+        setToastMessage("Username or password is incorrect.");
+        setToastColor("red");
+
+        setTimeout(() => {
+          setToastMessage(null);
+        }, 1500);
       }
     } catch (err) {
       console.error("Network error:", err);
-      setPopupMessage("Network error. Please try again.");
+      setToastMessage("Network error. Please try again.");
+      setToastColor("red");
+
+      setTimeout(() => {
+        setToastMessage(null);
+      }, 1500);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--background)] px-4">
       <div className="w-full max-w-xl bg-white p-10 rounded-2xl shadow-xl">
-        <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
-          Log In
-        </h2>
-
-        {popupMessage && (
-          <div className="bg-red-500 text-white text-sm font-bold py-2 px-4 rounded-md mb-4 text-center">
-            {popupMessage}
-          </div>
-        )}
+        <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Log In</h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -102,6 +111,14 @@ const Login = () => {
           </button>
         </form>
       </div>
+
+      {toastMessage && (
+        <Toast
+          message={toastMessage}
+          color={toastColor}
+          onClose={() => setToastMessage(null)}
+        />
+      )}
     </div>
   );
 };

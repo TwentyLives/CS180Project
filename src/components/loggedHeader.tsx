@@ -26,9 +26,9 @@ const LoggedHeader = () => {
           </div>
 
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-700">
-            <Link href="#" className="hover:brightness-110 hover:scale-105 transition">My Garage</Link>
+            <Link href="/mygarage" className="hover:brightness-110 hover:scale-105 transition">My Garage</Link>
             <Link href="#" className="hover:brightness-110 hover:scale-105 transition">Fuel Prices</Link>
-            <Link href="#" className="hover:brightness-110 hover:scale-105 transition">Stations</Link>
+            <Link href="/stations" className="hover:brightness-110 hover:scale-105 transition">Stations</Link>
             <Link href="#" className="hover:brightness-110 hover:scale-105 transition">About</Link>
             <Link href="#" className="hover:brightness-110 hover:scale-105 transition">Help</Link>
           </div>
