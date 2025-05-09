@@ -169,13 +169,6 @@ export default function GaragePage() {
               <div className="px-4 py-3 text-base font-medium rounded-lg cursor-pointer hover:backdrop-brightness-110 hover:text-gray-800 hover:shadow-md active:scale-95 active:brightness-110 transition">
                 Help
               </div>
-
-              {/* Border  */}
-              <div className="my-2 border-t border-gray-300" />
-
-              <div className="px-4 py-3 text-base font-medium rounded-lg cursor-pointer hover:backdrop-brightness-110 hover:text-gray-800 hover:shadow-md active:scale-95 active:brightness-110 transition">
-                Log Out
-              </div>
             </div>
           </div>
 
