@@ -52,9 +52,7 @@ const LocationComponent = () => {
             }
           );
 
-          if (!response.ok) {
-            throw new Error("Failed to fetch address");
-          }
+          if (!response.ok) throw new Error("Failed to fetch address");
 
           const data = await response.json();
           setAddress(data.display_name || "Address not found");
@@ -63,7 +61,7 @@ const LocationComponent = () => {
           setAddress("Failed to retrieve address");
         }
 
-        // Query for nearby gas stations using Overpass API
+        // Overpass API to fetch nearby gas stations
         try {
           const overpassQuery = `
             [out:json];
@@ -77,6 +75,7 @@ const LocationComponent = () => {
             },
             body: `data=${encodeURIComponent(overpassQuery)}`,
           });
+
           const overpassData = await overpassResponse.json();
           setGasStations(overpassData.elements || []);
         } catch (err) {
@@ -92,13 +91,62 @@ const LocationComponent = () => {
       }
     );
   };
-  const gasPrices: Record<string, string> = {
-    "Chevron": "$5.00/Regular*",
-    "Shell": "$5.10/Regular*",
-    "Mobil": "$4.75/Regular*",
-    "ARCO": "$4.46/Regular*",
-    "76": "$4.90/Regular*",
-    "Arco": "$4.40/Regular*",
+
+  const gasPrices: Record<string, Record<string, string>> = {
+    "Chevron": {
+      Regular: "$4.90",
+      Midgrade: "$5.10",
+      Premium: "$5.40",
+      Diesel: "$4.70"
+    },
+    "Shell": {
+      Regular: "$5.20",
+      Midgrade: "$5.40*",
+      Premium: "$5.60*"
+    },
+    "Mobil": {
+      Regular: "$5.00",
+      Midgrade: "$5.20",
+      Premium: "$5.40",
+      Diesel: "$4.66"
+    },
+    "ARCO": {
+      Regular: "$4.80",
+      Midgrade: "$5.00*",
+      Premium: "$5.10*"
+    },
+    "76": {
+      Regular: "$4.80",
+      Midgrade: "$4.90*",
+      Premium: "$5.00*"
+    },
+    "Arco": {
+      Regular: "$4.64",
+      Midgrade: "$4.66",
+      Premium: "$4.86",
+      Diesel: "$5.00"
+    },
+    "Speedway Gas": {
+      Regular: "$4.90",
+      Midgrade: "$5.10",
+      Premium: "$5.30",
+    },
+    "Flyers": {
+      Regular: "$4.70",
+      Diesel: "$4.80*"
+    },
+    "Downs Energy": {
+      Regular: "$4.70",
+      Diesel: "$4.69"
+    },
+    "Kwik Serv": {
+      Regular: "$4.45",
+    },
+    "7-Eleven": {
+      Regular: "$5.09",
+      Midgrade: "$5.29",
+      Premium: "$5.49",
+    },
   };
   
   return (
@@ -131,19 +179,21 @@ const LocationComponent = () => {
             <Popup>Your location</Popup>
           </Marker>
 
-          {/* Markers for nearby gas stations */}
-          {gasStations.map((station: any, index) => (
-            // <Marker key={index} position={[station.lat, station.lon]}>
-            //   <Popup>{station.tags.name || "Unnamed Gas Station"}</Popup>
-            // </Marker>
-            <Marker key={index} position={[station.lat, station.lon]}>
-              <Popup>
-                {station.tags.name || "Unnamed Gas Station"}<br />
-                {gasPrices[station.tags.name || "Unnamed Gas Station"] || "N/A"}
-              </Popup>
-            </Marker>
-            
-          ))}
+          {/* Gas station markers */}
+          {gasStations.map((station, index) => (
+          <Marker key={index} position={[station.lat, station.lon]}>
+            <Popup>
+              <strong>{station.tags.name || "Unnamed Gas Station"}</strong><br />
+              {Object.entries(gasPrices[station.tags.name || "Unnamed Gas Station"] || {}).map(
+                ([type, price]) => (
+                  <div key={type}>
+                    {type.charAt(0).toUpperCase() + type.slice(1)}: {price}
+                  </div>
+                )
+              )}
+            </Popup>
+          </Marker>
+        ))}
         </MapContainer>
       )}
     </div>
