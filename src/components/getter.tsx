@@ -52,13 +52,40 @@ const Getter = () => {
     setFormData(prev => ({ ...prev, rating: val }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedStation) return;
-    console.log({
-      station: selectedStation,
-      prices: formData,
-    });
+
+    // Map frontend station to backend format
+    const stationPayload = {
+      overpass_id: selectedStation.id,
+      name: selectedStation.tags.name || "",
+      lat: selectedStation.lat,
+      lon: selectedStation.lon,
+    };
+
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/submit-gas-price/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          station: stationPayload,
+          prices: formData,
+        }),
+      });
+
+      if (res.ok) {
+        setToastMessage("Gas price submitted!");
+        setToastColor("green");
+        setFormData({ regular: "", premium: "", diesel: "", rating: 0 });
+      } else {
+        setToastMessage("Failed to submit. Try again.");
+        setToastColor("red");
+      }
+    } catch {
+      setToastMessage("Submission error.");
+      setToastColor("red");
+    }
   };
 
   const fetchGasStations = async (lat: number, lon: number) => {
@@ -147,8 +174,8 @@ const Getter = () => {
         <h2 className="text-2xl font-bold text-[#0f4c81]">Submit Gas Prices</h2>
 
         <p className="text-sm text-gray-600">
-          Use the map and form below to submit gas prices. Start by searching a city, street address, or landmark (e.g., "Riverside, CA", "900 University Ave", or "Chevron"). 
-          You can also <span className="font-semibold text-blue-600">use your current location</span> to find nearby stations. Click a station marker to select it. 
+          Use the map and form below to submit gas prices. Start by searching a city, street address, or landmark (e.g., "Riverside, CA", "900 University Ave", or "Chevron").
+          You can also <span className="font-semibold text-blue-600">use your current location</span> to find nearby stations. Click a station marker to select it.
           Then fill in the prices and optionally leave a 0–5 star rating.
           <br /><br />
           Use the <span className="font-semibold">Brand Filter</span> dropdown to show only certain gas station chains.
