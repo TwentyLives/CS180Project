@@ -12,7 +12,7 @@ class Station(models.Model):
 
 class Fuel(models.Model):
     type = models.CharField(max_length=16)
-    price = models.DecimalField()
+    price = models.DecimalField(max_digits=6, decimal_places=2)
     station = models.ForeignKey(Station, on_delete=models.CASCADE)
     last_updated = models.DateTimeField(auto_now_add=True)
 

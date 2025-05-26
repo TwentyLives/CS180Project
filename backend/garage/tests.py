@@ -1,5 +1,5 @@
 from django.test import TestCase
-from stations.models import Fuel
+from stations.models import Fuel, Station
 from .models import Car
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -8,7 +8,10 @@ class CarModelTests(TestCase):
     def setUp(self):
         # Create a user and a fuel type for testing
         self.user = User.objects.create_user(username='testuser', password='securepass123')
-        self.fuel = Fuel.objects.create(name='Premium')
+        # create a station first
+        self.station = Station.objects.create(name="Test Station", user=self.user)
+        # now create fuel with station reference
+        self.fuel = Fuel.objects.create(station=self.station, type='Premium', price=3.59)
 
     def test_create_car_successfully(self):
         """
@@ -23,7 +26,7 @@ class CarModelTests(TestCase):
             fuel_type=self.fuel
         )
         self.assertEqual(car.make, 'Toyota')
-        self.assertEqual(car.fuel_type.name, 'Premium')
+        self.assertEqual(car.fuel_type.type, 'Premium')
         self.assertEqual(car.owner.username, 'testuser')
 
     def test_missing_required_field_fails(self):

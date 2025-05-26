@@ -69,3 +69,7 @@ backend/register/migrations/__pycache__/__init__.cpython-312.pyc
 backend/stations/__pycache__/
 backend/stations/migrations/__pycache__/
 backend/garage/__pycache__/tests.cpython-312.pyc
+backend/garage/migrations/0001_initial.py
+backend/register/migrations/0002_delete_user.py
+backend/register/migrations/__pycache__/0002_delete_user.cpython-312.pyc
+backend/stations/migrations/0001_initial.py
