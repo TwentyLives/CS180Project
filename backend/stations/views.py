@@ -36,3 +36,22 @@ class GasPriceSubmitView(APIView):
         )
 
         return Response({"message": "Gas price submitted!"}, status=status.HTTP_201_CREATED)
+
+class StationPricesView(APIView):
+    def get(self, request, overpass_id):
+        try:
+            station = Station.objects.get(overpass_id=overpass_id)
+        except Station.DoesNotExist:
+            return Response({"error": "Station not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        latest = station.submissions.order_by('-submitted_at').first()
+        if not latest:
+            return Response({"error": "No price data"}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({
+            "regular": latest.regular,
+            "premium": latest.premium,
+            "diesel": latest.diesel,
+            "rating": latest.rating,
+            "submitted_at": latest.submitted_at,
+        })
