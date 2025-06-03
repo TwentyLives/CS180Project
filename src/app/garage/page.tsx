@@ -1,0 +1,319 @@
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import { ChevronDown, Fuel, PaintBucket, ArrowRightLeft, CarFront } from 'lucide-react';
+import Image from 'next/image';
+import Card from './Card';
+import VehicleImage from './VehicleImage';
+import VehicleInfo from './VehicleInfo';
+import ImageCard from './ImageCard';
+import UserTitle from './UserTitle';
+import LogRefuelModal from './LogRefuel';
+import Toast from './Toast';
+import { useRouter } from 'next/navigation';
+
+
+interface GarageVehicle {
+  id: string;
+  make: string;
+  model: string;
+  type: 'Sedan' | 'SUV' | 'Van';
+  year: string;
+  trim: string;
+  fuelType: string;
+  tankCapacity: string;
+  mpg: string;
+  fuelSide: string;
+}
+
+interface RefuelLog {
+  carId: string;
+  date: string; // YYYY-MM-DD
+  gallons: number;
+  cost: number;
+  odometer: number;
+}
+
+const refuelLogs: RefuelLog[] = [
+  { carId: '1', date: '2025-05-26', gallons: 10, cost: 45, odometer: 12000 },
+  { carId: '1', date: '2025-05-30', gallons: 12, cost: 50, odometer: 12400 },
+  { carId: '1', date: '2025-06-02', gallons: 11, cost: 48, odometer: 12730 },
+];
+
+function calculateAverageMPG(carId: string): number | null {
+  const logs = refuelLogs.filter((log) => log.carId === carId);
+  if (logs.length < 2) return null;
+
+  const sorted = logs.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  let totalMiles = 0;
+  let totalGallons = 0;
+
+  for (let i = 1; i < sorted.length; i++) {
+    const miles = sorted[i].odometer - sorted[i - 1].odometer;
+    totalMiles += miles;
+    totalGallons += sorted[i].gallons;
+  }
+  return parseFloat((totalMiles / totalGallons).toFixed(1));
+}
+
+function calculateTotalMiles(carId: string): number {
+  const logs = refuelLogs.filter((log) => log.carId === carId);
+  if (logs.length < 2) return 0;
+  const sorted = logs.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  return sorted[sorted.length - 1].odometer - sorted[0].odometer;
+}
+
+function findMostDrivenCarId(): string {
+  if (vehicles.length === 1) return vehicles[0].id;
+
+  let maxMiles = -1;
+  let mostDrivenId = '';
+  for (const v of vehicles) {
+    const miles = calculateTotalMiles(v.id);
+    if (miles > maxMiles) {
+      maxMiles = miles;
+      mostDrivenId = v.id;
+    }
+  }
+  return mostDrivenId;
+}
+
+function generateMPGHistory(carId: string) {
+  const logs = refuelLogs.filter((log) => log.carId === carId);
+  const sorted = logs.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const history = [];
+  for (let i = 1; i < sorted.length; i++) {
+    const mpg = (sorted[i].odometer - sorted[i - 1].odometer) / sorted[i].gallons;
+    history.push({ date: sorted[i].date.slice(5), mpg: parseFloat(mpg.toFixed(1)) });
+  }
+  return history;
+}
+
+function calculateMonthlyCost(carId: string): number {
+  const logs = refuelLogs.filter((log) => log.carId === carId);
+  const currentMonth = new Date().getMonth();
+  const thisMonthLogs = logs.filter((log) => new Date(log.date).getMonth() === currentMonth);
+  return thisMonthLogs.reduce((sum, log) => sum + log.cost, 0);
+}
+
+function getTrendArrow(current: number, previous: number) {
+  if (current > previous) return '📉';
+  if (current < previous) return '📈';
+  return '➖';
+}
+
+function getConsumptionLabel(mpg: number) {
+  if (mpg < 19) return { color: 'bg-red-500', text: 'Gas guzzler zone 🔥' };
+  if (mpg <= 30) return { color: 'bg-yellow-400', text: 'Normal driving pattern 🚗' };
+  return { color: 'bg-green-500', text: 'Fuel efficient warrior 🍃' };
+}
+
+const vehicles: GarageVehicle[] = [
+  {
+    id: '1',
+    make: 'Toyota',
+    model: 'Camry',
+    type: 'Sedan',
+    year: '2018',
+    trim: 'XLE',
+    fuelType: 'Premium',
+    tankCapacity: '15.9 gal',
+    mpg: '28',
+    fuelSide: 'Left',
+  },
+  {
+    id: '2',
+    make: 'Honda',
+    model: 'CR-V',
+    type: 'SUV',
+    year: '2020',
+    trim: 'EX-L',
+    fuelType: 'Regular',
+    tankCapacity: '14.0 gal',
+    mpg: '30',
+    fuelSide: 'Right',
+  },
+  {
+    id: '3',
+    make: 'Ford',
+    model: 'Transit',
+    type: 'Van',
+    year: '2021',
+    trim: 'XLT',
+    fuelType: 'Diesel',
+    tankCapacity: '25.0 gal',
+    mpg: '20',
+    fuelSide: 'Left',
+  },
+];
+
+export default function GaragePage() {
+  const [selectedVehicle, setSelectedVehicle] = useState<GarageVehicle>(vehicles[0]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [openUpward, setOpenUpward] = useState(false);
+  const [isChanging, setIsChanging] = useState(false);
+  const [showRefuelModal, setShowRefuelModal] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  const toggleDropdown = () => setIsOpen(!isOpen);
+  const toggleProfileMenu = () => setProfileMenuOpen(!profileMenuOpen);
+
+  const selectVehicle = (v: GarageVehicle) => {
+    if (v.id === selectedVehicle.id) return;
+    setIsChanging(true);
+    setTimeout(() => {
+      setSelectedVehicle(v);
+      setIsChanging(false);
+      setIsOpen(false);
+    }, 800);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      setOpenUpward(windowHeight - rect.bottom < 200);
+    }
+  }, [isOpen]);
+
+  const mpg = calculateAverageMPG(selectedVehicle.id);
+  const cost = calculateMonthlyCost(selectedVehicle.id);
+  const previousMPG = 27.2;
+  const trendArrow = mpg ? getTrendArrow(mpg, previousMPG) : '–';
+  const consumption = getConsumptionLabel(mpg || parseFloat(selectedVehicle.mpg));
+  const mpgHistory = generateMPGHistory(selectedVehicle.id);
+  const totalMiles = calculateTotalMiles(selectedVehicle.id);
+  const router = useRouter();
+  const mostDrivenCarId = findMostDrivenCarId();
+
+  return (
+    <main className="relative font-['IBM_Plex_Sans'] bg-gradient-to-br from-[#f2f5f2] via-[#e0e8e0] to-[#d8e8d8] text-black min-h-screen p-6 space-y-6 overflow-hidden">
+      <div className="flex justify-between items-center z-10 relative">
+        <UserTitle username="User" />
+        <div className="flex items-center space-x-4">
+          <div ref={dropdownRef} className="relative">
+            <button
+              ref={buttonRef}
+              onClick={toggleDropdown}
+              className="flex items-center font-regular px-4 py-1.5 bg-gradient-to-br from-[#e4ebe4] via-[#dbe3db] to-[#cfd8cf] text-gray-700 rounded-full shadow-inner hover:brightness-105 hover:scale-105 active:scale-95 transition-all"
+            >
+              <span>Garage</span>
+              <ChevronDown className={`ml-2 w-5 h-5 transform transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+            <div className={`absolute right-0 ${openUpward ? 'bottom-full mb-2' : 'mt-2'} w-52 bg-white/40 backdrop-blur-md rounded-2xl shadow-lg z-20 transition-all duration-300 ease-in-out ${isOpen ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-2 scale-95 pointer-events-none'}`}>
+              {vehicles.map((v) => (
+                <div
+                  key={v.id}
+                  onClick={() => selectVehicle(v)}
+                  className={`px-4 py-3 text-base flex justify-between items-center rounded-lg cursor-pointer hover:backdrop-brightness-110 hover:text-gray-800 hover:shadow-md active:scale-95 active:brightness-110 transition ${selectedVehicle.id === v.id ? 'font-bold text-black' : 'text-gray-700'}`}
+                >
+                  <span>
+                    {v.make} {v.model}
+                    {vehicles.length === 1 || v.id === mostDrivenCarId ? ' ⭐' : ''}
+                  </span>
+                  {selectedVehicle.id === v.id && <span>🚗</span>}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div ref={profileRef} className="relative">
+            <div
+              onClick={toggleProfileMenu}
+              className="w-11 h-11 bg-gradient-to-br from-[#e4ebe4] via-[#dbe3db] to-[#cfd8cf] rounded-full flex items-center justify-center shadow-inner hover:brightness-105 hover:scale-105 active:scale-95 transition-all"
+            >
+              <Image src="/images/user_profile.png" alt="Profile" width={44} height={44} className="object-cover" />
+            </div>
+            <div className={`absolute right-0 mt-2 w-44 bg-white/40 backdrop-blur-md rounded-2xl p-2 shadow-lg z-20 transition-all duration-300 ${profileMenuOpen ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-2 scale-95 pointer-events-none'}`}>
+              <div
+                onClick={() => router.push('/garage/add')}
+                className="px-4 py-3 text-base font-medium rounded-lg cursor-pointer hover:backdrop-brightness-110 hover:text-gray-800 hover:shadow-md active:scale-95 active:brightness-110 transition"
+              >
+                Add Vehicle
+              </div>
+              <div className="px-4 py-3 text-base font-medium rounded-lg cursor-pointer hover:backdrop-brightness-110 hover:text-gray-800 hover:shadow-md active:scale-95 active:brightness-110 transition">
+                Settings
+              </div>
+              <div className="px-4 py-3 text-base font-medium rounded-lg cursor-pointer hover:backdrop-brightness-110 hover:text-gray-800 hover:shadow-md active:scale-95 active:brightness-110 transition">
+                Help
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className={`grid grid-cols-2 gap-6 items-center mt-12 transform-gpu transition-all duration-700 ease-in-out ${isChanging ? 'opacity-0 scale-95 blur-sm' : 'opacity-100 scale-100 blur-0'}`}>
+        <div className="flex flex-col items-center gap-3">
+          <div className="animate-gentle-floating">
+            <VehicleImage type={selectedVehicle.type} />
+          </div>
+          <VehicleInfo
+            make={selectedVehicle.make}
+            model={selectedVehicle.model}
+            year={selectedVehicle.year}
+            trim={selectedVehicle.trim}
+          />
+          <button
+            className="bg-[#0f4c81] text-white px-6 py-3 rounded-full text-base font-medium shadow-md hover:brightness-110 hover:scale-105 active:scale-95 transition-all"
+            onClick={() => setShowRefuelModal(true)}
+          >
+            Log Refuel +
+          </button>
+        </div>
+        <div className="flex flex-col items-start gap-2 animate-fade-in-float">
+          <div className="text-md text-gray-600">TOTAL MILES</div>
+          <div className="text-2xl font-bold text-black">{totalMiles} mi</div>
+          <div className="text-md text-gray-600">DRIVING STYLE</div>
+          <div className="flex items-center gap-2">
+            <span className={`w-3 h-3 rounded-full ${consumption.color}`} />
+            <span className="text-2xl font-bold text-black">{consumption.text}</span>
+          </div>
+          <div className="text-md text-gray-600">AVG MPG (7d)</div>
+          <div className="text-2xl font-bold text-black">{mpg ?? 'N/A'} <span>{trendArrow}</span></div>
+          <div className="text-md text-gray-600">MONTHLY COST</div>
+          <div className="text-2xl font-bold text-black">${cost.toFixed(2)}</div>
+        </div>
+      </div>
+
+      <div className={`grid grid-cols-2 gap-4 mt-8 transform-gpu transition-all duration-700 ease-in-out ${isChanging ? 'opacity-0 scale-95 blur-sm' : 'opacity-100 scale-100 blur-0'} animate-fade-in-float`}>
+        <Card title="Fuel Type" status={selectedVehicle.fuelType} icon={<Fuel />} />
+        <Card title="Fuel Side" status={selectedVehicle.fuelSide} icon={<ArrowRightLeft />} />
+        <Card title="Tank Size" status={selectedVehicle.tankCapacity} icon={<PaintBucket />} />
+        <Card title="MPG" status={`${selectedVehicle.mpg} mpg`} icon={<CarFront />} />
+      </div>
+
+<div className={`mt-6 transform-gpu transition-all duration-700 ease-in-out ${isChanging ? 'opacity-0 scale-95 blur-sm' : 'opacity-100 scale-100 blur-0'}`}>
+  <ImageCard />
+</div>
+
+<LogRefuelModal
+  isOpen={showRefuelModal}
+  onClose={() => setShowRefuelModal(false)}
+  onSubmit={(data) => {
+    console.log("Refuel data submitted for car:", selectedVehicle.id);
+    console.log(data);
+    setToastMessage("Refuel logged successfully ✅");
+  }}
+/>
+{toastMessage && <Toast message={toastMessage} onClose={() => setToastMessage('')} />} 
+    </main>
+  );
+}
