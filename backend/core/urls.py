@@ -21,6 +21,8 @@ from register import views as register_views
 from register.views import RegisterAPI, LoginAPI
 from garage import views as garage_views
 from map import views as map_views
+from register.views import TotalUsersAPI
+from stations.views import GasPriceSubmitView, StationPricesView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,4 +31,7 @@ urlpatterns = [
     path('map/', map_views.map, name='map'),
     path('api/register/', RegisterAPI.as_view(), name='api-register'),
     path('api/login/', LoginAPI.as_view(), name='api-login'),
+    path("api/total-users", TotalUsersAPI.as_view(), name="total-users"),
+    path('api/submit-gas-price/', GasPriceSubmitView.as_view(), name='submit-gas-price'),
+    path('api/station-prices/<int:overpass_id>/', StationPricesView.as_view(), name='station-prices'),
 ]

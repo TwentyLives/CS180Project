@@ -10,6 +10,7 @@ const CreateAccount = () => {
   });
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastColor, setToastColor] = useState<"red" | "green">("red");
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,6 +23,7 @@ const CreateAccount = () => {
 
     if (!formData.username || !formData.password) {
       setToastMessage("Username or password is missing.");
+      setToastColor("red");
       return;
     }
 
@@ -38,19 +40,22 @@ const CreateAccount = () => {
 
       if (response.ok) {
         sessionStorage.setItem("loginData", JSON.stringify(data));
-
         setToastMessage("Account created successfully");
+        setToastColor("green");
 
         setTimeout(() => {
+          setToastMessage(null);
           router.push("/dashboard");
         }, 1500);
       } else {
         console.error("Error:", data);
         setToastMessage("Failed to create account. Check details.");
+        setToastColor("red");
       }
     } catch (error) {
       console.error("Error:", error);
       setToastMessage("Network error. Please try again.");
+      setToastColor("red");
     }
   };
 
@@ -105,7 +110,11 @@ const CreateAccount = () => {
       </div>
 
       {toastMessage && (
-        <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
+        <Toast
+          message={toastMessage}
+          color={toastColor}
+          onClose={() => setToastMessage(null)}
+        />
       )}
     </div>
   );

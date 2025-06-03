@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import UserSerializer
+from django.contrib.auth.models import User
 
 def register(request):
     if request.method == "POST":
@@ -47,3 +48,9 @@ class LoginAPI(APIView):
         else:
             # Authentication failed
             return Response({"error": "Invalid username or password."}, status=status.HTTP_401_UNAUTHORIZED)
+        
+# from django.contrib.auth.models import User (I know im working in your code so if we ever merge i need this library)
+class TotalUsersAPI(APIView):
+    def get(self, request):
+        total_users = User.objects.count()
+        return Response({"total_users": total_users}, status=status.HTTP_200_OK)        
