@@ -138,7 +138,7 @@ export default function LogRefuelModal({ isOpen, onClose, onSubmit }: Props) {
             placeholder="e.g. 10 or 10.5"
           />
           {gallons && !isValidNumber(gallons) && (
-            <p className="mt-1 text-sm text-red-500">請輸入有效的數字。</p>
+            <p className="mt-1 text-sm text-red-500">Please enter valid number.</p>
           )}
         </div>
 
