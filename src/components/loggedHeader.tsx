@@ -30,7 +30,7 @@ const LoggedHeader = () => {
             <Link href="/submitprices" className="hover:brightness-110 hover:scale-105 transition">Submit Prices</Link>
             <Link href="/stations" className="hover:brightness-110 hover:scale-105 transition">Stations Near Me</Link>
             <Link href="/directions" className="hover:brightness-110 hover:scale-105 transition">Directions To Stations</Link>
-            <Link href="#" className="hover:brightness-110 hover:scale-105 transition">Find Recommendations</Link>
+            <Link href="/recommendations" className="hover:brightness-110 hover:scale-105 transition">Find Recommendations</Link>
           </div>
 
           <div className="flex items-center gap-4">

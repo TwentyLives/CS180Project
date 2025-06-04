@@ -190,7 +190,6 @@ const Getter = () => {
             <option value="Chevron">Chevron</option>
             <option value="76">76</option>
             <option value="Mobil">Mobil</option>
-            <option value="Unnamed">Unnamed Stations</option>
           </select>
         </div>
 

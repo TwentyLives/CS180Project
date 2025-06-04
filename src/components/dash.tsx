@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 interface LoginData {
   username: string;
@@ -16,12 +17,29 @@ const Dash: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-b from-[#f5fdf7] via-[#edf7ef] to-[#e6f0e6] px-8 py-6">
-      <div className="text-left">
-        <p className="text-md text-gray-600 italic">Welcome back,</p>
-        <h1 className="text-3xl font-bold text-[#171717]">
-          {loginData ? loginData.username : "User"}
+    <div className="relative w-full h-screen overflow-hidden text-[#171717] font-sans">
+      <video
+        className="absolute inset-0 w-full h-full object-cover z-0"
+        src="/Cars.mp4"
+        autoPlay
+        loop
+        muted
+        playsInline
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/30 to-transparent backdrop-blur-sm z-10" />
+      <div className="relative z-20 flex flex-col items-center justify-center h-full text-center px-4">
+        <h1 className="text-5xl md:text-6xl font-bold drop-shadow-md">
+          Welcome back, <span className="text-[#0f4c81]">{loginData?.username || "User"}</span>
         </h1>
+        <p className="text-lg md:text-xl mt-4 text-gray-700">
+          Ready to start saving?
+        </p>
+        <Link
+          href="/mygarage"
+          className="mt-6 px-6 py-3 bg-[#0f4c81] text-white rounded-full shadow-md hover:brightness-110 hover:scale-105 active:scale-95 transition"
+        >
+          Go to My Garage
+        </Link>
       </div>
     </div>
   );

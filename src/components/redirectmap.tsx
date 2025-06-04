@@ -60,11 +60,15 @@ const StationNavigate = () => {
           <div>
             <h2 className="text-3xl font-bold mb-4 text-[#0f4c81]">Navigate to Gas Station</h2>
             <p className="text-gray-700 mb-6 leading-relaxed">
-              To get directions, please first click on a gas station from the{" "}
+              To get directions, please first click on a gas station from either the{" "}
+              <Link href="/recommendations" className="text-blue-600 font-semibold underline hover:text-blue-800">
+                Recommendations
+              </Link>{" "}
+              page or the{" "}
               <Link href="/stations" className="text-blue-600 font-semibold underline hover:text-blue-800">
                 Stations
               </Link>{" "}
-              page. Once you've selected a station, you'll be able to open Google Maps from here.
+              page. Once you've selected a station, the map below will update and you can open Google Maps to navigate to it.
             </p>
           </div>
 
