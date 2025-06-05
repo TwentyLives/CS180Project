@@ -67,7 +67,7 @@ const LocationComponent = () => {
         try {
           const overpassQuery = `
             [out:json];
-            node["amenity"="fuel"](around:25000, ${latitude}, ${longitude});
+            node["amenity"="fuel"](around:5000, ${latitude}, ${longitude});
             out body;
           `;
           const overpassResponse = await fetch("https://overpass-api.de/api/interpreter", {
