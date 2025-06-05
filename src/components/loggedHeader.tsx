@@ -17,7 +17,7 @@ const LoggedHeader = () => {
     <>
       <nav className="w-full sticky top-0 z-50 bg-white/40 backdrop-blur-md shadow-sm border-b border-gray-200 px-8 py-4 font-sans text-[#171717]">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          
+
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-[#d8e8d8] rounded-full shadow-sm" />
             <h1 className="text-2xl font-bold tracking-tight text-[#0f4c81] hover:brightness-110 transition duration-200">
@@ -26,11 +26,11 @@ const LoggedHeader = () => {
           </div>
 
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-700">
-            <Link href="/mygarage" className="hover:brightness-110 hover:scale-105 transition">My Garage</Link>
-            <Link href="#" className="hover:brightness-110 hover:scale-105 transition">Fuel Prices</Link>
-            <Link href="/stations" className="hover:brightness-110 hover:scale-105 transition">Stations</Link>
-            <Link href="#" className="hover:brightness-110 hover:scale-105 transition">About</Link>
-            <Link href="#" className="hover:brightness-110 hover:scale-105 transition">Help</Link>
+            <Link href="/garage" className="hover:brightness-110 hover:scale-105 transition">My Garage</Link>
+            <Link href="/submitprices" className="hover:brightness-110 hover:scale-105 transition">Submit Prices</Link>
+            <Link href="/stations" className="hover:brightness-110 hover:scale-105 transition">Stations Near Me</Link>
+            <Link href="/directions" className="hover:brightness-110 hover:scale-105 transition">Directions To Stations</Link>
+            <Link href="#" className="hover:brightness-110 hover:scale-105 transition">Find Recommendations</Link>
           </div>
 
           <div className="flex items-center gap-4">

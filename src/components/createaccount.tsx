@@ -10,6 +10,7 @@ const CreateAccount = () => {
   });
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastColor, setToastColor] = useState<"red" | "green">("red");
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,10 +23,12 @@ const CreateAccount = () => {
 
     if (!formData.username || !formData.password) {
       setToastMessage("Username or password is missing.");
+      setToastColor("red");
       return;
     }
 
     try {
+      // Register the user
       const response = await fetch("http://127.0.0.1:8000/api/register/", {
         method: "POST",
         headers: {
@@ -37,20 +40,41 @@ const CreateAccount = () => {
       const data = await response.json();
 
       if (response.ok) {
-        sessionStorage.setItem("loginData", JSON.stringify(data));
+        // After successful registration, log the user in
+        const loginResponse = await fetch("http://127.0.0.1:8000/api/login/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
 
-        setToastMessage("Account created successfully");
+        const loginData = await loginResponse.json();
 
-        setTimeout(() => {
-          router.push("/dashboard");
-        }, 1500);
+        if (loginResponse.ok) {
+          // Store credentials (e.g., token) in a cookie
+          document.cookie = `token=${loginData.token}; path=/;`;
+
+          setToastMessage("Account created and logged in successfully");
+          setToastColor("green");
+
+          setTimeout(() => {
+            setToastMessage(null);
+            router.push("/dashboard");
+          }, 1500);
+        } else {
+          setToastMessage("Account created, but failed to log in.");
+          setToastColor("red");
+        }
       } else {
         console.error("Error:", data);
         setToastMessage("Failed to create account. Check details.");
+        setToastColor("red");
       }
     } catch (error) {
       console.error("Error:", error);
       setToastMessage("Network error. Please try again.");
+      setToastColor("red");
     }
   };
 
@@ -105,7 +129,11 @@ const CreateAccount = () => {
       </div>
 
       {toastMessage && (
-        <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
+        <Toast
+          message={toastMessage}
+          color={toastColor}
+          onClose={() => setToastMessage(null)}
+        />
       )}
     </div>
   );

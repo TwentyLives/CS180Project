@@ -1,24 +1,23 @@
 from django.db import models
-from django.contrib.auth import get_user_model
-User = get_user_model()
 
 # Create your models here.
 class Station(models.Model):
-    name = models.CharField(max_length=128)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    # Overpass API station id
+    overpass_id = models.BigIntegerField(unique=True)
+    name = models.CharField(max_length=128, blank=True, null=True)
+    lat = models.FloatField()
+    lon = models.FloatField()
 
     def __str__(self):
-        return self.name
+        return self.name or f"Station {self.overpass_id}"
 
-class Fuel(models.Model):
-    type = models.CharField(max_length=16)
-    price = models.DecimalField(max_digits=6, decimal_places=2)
-    station = models.ForeignKey(Station, on_delete=models.CASCADE)
-    last_updated = models.DateTimeField(auto_now_add=True)
+class GasPriceSubmission(models.Model):
+    station = models.ForeignKey(Station, on_delete=models.CASCADE, related_name="submissions")
+    regular = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    premium = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    diesel = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    rating = models.PositiveSmallIntegerField(default=0)
+    submitted_at = models.DateTimeField(auto_now_add=True)
 
-class Address(models.Model):
-    street = models.CharField(max_length=64)
-    city = models.CharField(max_length=32)
-    state = models.CharField(max_length=16)
-    zip = models.CharField(max_length=5)
-    station = models.ForeignKey(Station,  on_delete=models.CASCADE)
+    def __str__(self):
+        return f"Submission for {self.station} at {self.submitted_at}"
