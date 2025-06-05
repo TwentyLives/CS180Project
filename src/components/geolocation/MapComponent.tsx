@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -28,7 +28,6 @@ const LocationComponent = () => {
   const [error, setError] = useState<string | null>(null);
   const [stationPrices, setStationPrices] = useState<{ [id: number]: any }>({});
 
-  // Function to get current location
   const getLocation = () => {
     if (!navigator.geolocation) {
       setError("Geolocation is not supported by this browser.");
@@ -63,7 +62,6 @@ const LocationComponent = () => {
           setAddress("Failed to retrieve address");
         }
 
-        // Overpass API to fetch nearby gas stations
         try {
           const overpassQuery = `
             [out:json];
@@ -72,16 +70,12 @@ const LocationComponent = () => {
           `;
           const overpassResponse = await fetch("https://overpass-api.de/api/interpreter", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-            },
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: `data=${encodeURIComponent(overpassQuery)}`,
           });
 
           const overpassData = await overpassResponse.json();
-          const stations = overpassData.elements || [];
-
-          setGasStations(stations);
+          setGasStations(overpassData.elements || []);
         } catch (err) {
           console.error("Error during Overpass API request", err);
         } finally {
@@ -107,7 +101,14 @@ const LocationComponent = () => {
   };
 
   const handleMarkerClick = async (station: any) => {
-    // Only fetch if not already fetched
+    const selectedStation = {
+      name: station.tags.name || "Unnamed Gas Station",
+      address: station.tags["addr:full"] || station.tags["addr:street"] || undefined,
+      lat: station.lat,
+      lon: station.lon,
+    };
+    sessionStorage.setItem("selectedStation", JSON.stringify(selectedStation));
+
     if (!stationPrices[station.id]) {
       const prices = await fetchStationPrices(station.id);
       setStationPrices(prev => ({
@@ -118,68 +119,68 @@ const LocationComponent = () => {
   };
 
   return (
-    <div>
-      <button
-        onClick={getLocation}
-        disabled={loading}
-        className="px-4 py-2 bg-blue-200 text-black rounded-lg"
-        style={{ marginBottom: "0.5rem" }}
-      >
-        {loading ? "Locating..." : "Get Location"}
-      </button>
+    <div className="min-h-screen bg-[var(--background)] flex flex-col items-center justify-start px-4 py-10">
+      <div className="w-full max-w-3xl bg-white p-6 rounded-2xl shadow-md space-y-6 text-center">
+        <h2 className="text-2xl font-bold text-[#0f4c81]">Stations Near Me</h2>
 
-      {location && <p>Your coordinates: {location}</p>}
-      {address && (
-        <>
-          <p>Approximate address: {address}</p>
-          <div style={{ marginBottom: "2rem" }} />
-        </>
-      )}
+        <button
+          onClick={getLocation}
+          disabled={loading}
+          className="px-6 py-3 bg-blue-500 text-white rounded-xl font-semibold hover:bg-blue-600 transition"
+        >
+          {loading ? "Locating..." : "Get Location"}
+        </button>
+
+        {error && <p className="text-red-500">{error}</p>}
+        {location && <p className="text-gray-700">📍 {location}</p>}
+        {address && <p className="text-gray-500 italic">🗺️ {address}</p>}
+
+        {!coords && (
+          <p className="text-sm text-gray-400">
+            Click the button above to find gas stations around your current location.
+          </p>
+        )}
+      </div>
 
       {coords && (
-        <MapContainer
-          center={coords}
-          zoom={13}
-          style={{ width: "100%", height: "400px" }}
-        >
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          <Marker position={coords} icon={redIcon}>
-            <Popup>Your location</Popup>
-          </Marker>
+        <div className="w-full max-w-5xl mt-10 rounded-xl overflow-hidden shadow-md">
+          <MapContainer center={coords} zoom={13} style={{ width: "100%", height: "500px" }}>
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            <Marker position={coords} icon={redIcon}>
+              <Popup>Your location</Popup>
+            </Marker>
 
-          {/* Render markers for gas stations */}
-          {gasStations.map((station, index) => {
-            const stationName = station.tags.name || "Unnamed Gas Station";
-            const prices = stationPrices[station.id];
+            {gasStations.map((station, index) => {
+              const stationName = station.tags.name || "Unnamed Gas Station";
+              const prices = stationPrices[station.id];
 
-            return (
-              <Marker
-                key={index}
-                position={[station.lat, station.lon]}
-                eventHandlers={{
-                  click: () => handleMarkerClick(station),
-                }}
-              >
-                <Popup>
-                  <strong>{stationName}</strong><br />
-                  <div>
-                    {prices ? (
-                      <>
-                        {prices.regular !== undefined && <div>Regular: {prices.regular}</div>}
-                        {prices.premium !== undefined && <div>Premium: {prices.premium}</div>}
-                        {prices.diesel !== undefined && <div>Diesel: {prices.diesel}</div>}
-                        {prices.rating !== undefined && <div>Rating: {prices.rating}</div>}
-                        {(!prices.regular && !prices.premium && !prices.diesel) && <div>No price data</div>}
-                      </>
-                    ) : (
-                      <div>Click marker to load prices</div>
-                    )}
-                  </div>
-                </Popup>
-              </Marker>
-            );
-          })}
-        </MapContainer>
+              return (
+                <Marker
+                  key={index}
+                  position={[station.lat, station.lon]}
+                  eventHandlers={{ click: () => handleMarkerClick(station) }}
+                >
+                  <Popup>
+                    <strong>{stationName}</strong>
+                    <div>
+                      {prices ? (
+                        <>
+                          {prices.regular !== undefined && <div>Regular: {prices.regular}</div>}
+                          {prices.premium !== undefined && <div>Premium: {prices.premium}</div>}
+                          {prices.diesel !== undefined && <div>Diesel: {prices.diesel}</div>}
+                          {prices.rating !== undefined && <div>Rating: {prices.rating}</div>}
+                          {(!prices.regular && !prices.premium && !prices.diesel) && <div>No price data</div>}
+                        </>
+                      ) : (
+                        <div>Click marker to load prices</div>
+                      )}
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
+          </MapContainer>
+        </div>
       )}
     </div>
   );

@@ -55,3 +55,26 @@ class StationPricesView(APIView):
             "rating": latest.rating,
             "submitted_at": latest.submitted_at,
         })
+    
+class AllStationPricesView(APIView):
+        def get(self, request):
+            stations = Station.objects.all()
+            results = []
+
+            for station in stations:
+                latest = station.submissions.order_by('-submitted_at').first()
+                if latest:
+                    results.append({
+                        "id": station.overpass_id,
+                        "name": station.name,
+                        "brand": station.brand if hasattr(station, 'brand') else "Unknown",
+                        "lat": station.lat,
+                        "lon": station.lon,
+                        "regular": latest.regular,
+                        "premium": latest.premium,
+                        "diesel": latest.diesel,
+                        "rating": latest.rating,
+                    })
+
+            return Response(results)
+    

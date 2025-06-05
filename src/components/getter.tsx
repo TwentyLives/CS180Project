@@ -176,7 +176,7 @@ const Getter = () => {
         <p className="text-sm text-gray-600">
           Use the map and form below to submit gas prices. Start by searching a city, street address, or landmark (e.g., "Riverside, CA", "900 University Ave", or "Chevron").
           You can also <span className="font-semibold text-blue-600">use your current location</span> to find nearby stations. Click a station marker to select it.
-          Then fill in the prices and optionally leave a 0–5 star rating.
+          Then fill in the prices and leave a 0–5 star rating.
           <br /><br />
           Use the <span className="font-semibold">Brand Filter</span> dropdown to show only certain gas station chains.
         </p>

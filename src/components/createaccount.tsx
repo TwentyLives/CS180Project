@@ -28,6 +28,7 @@ const CreateAccount = () => {
     }
 
     try {
+      // Register the user
       const response = await fetch("http://127.0.0.1:8000/api/register/", {
         method: "POST",
         headers: {
@@ -39,14 +40,32 @@ const CreateAccount = () => {
       const data = await response.json();
 
       if (response.ok) {
-        sessionStorage.setItem("loginData", JSON.stringify(data));
-        setToastMessage("Account created successfully");
-        setToastColor("green");
+        // After successful registration, log the user in
+        const loginResponse = await fetch("http://127.0.0.1:8000/api/login/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
 
-        setTimeout(() => {
-          setToastMessage(null);
-          router.push("/dashboard");
-        }, 1500);
+        const loginData = await loginResponse.json();
+
+        if (loginResponse.ok) {
+          // Store credentials (e.g., token) in a cookie
+          document.cookie = `token=${loginData.token}; path=/;`;
+
+          setToastMessage("Account created and logged in successfully");
+          setToastColor("green");
+
+          setTimeout(() => {
+            setToastMessage(null);
+            router.push("/dashboard");
+          }, 1500);
+        } else {
+          setToastMessage("Account created, but failed to log in.");
+          setToastColor("red");
+        }
       } else {
         console.error("Error:", data);
         setToastMessage("Failed to create account. Check details.");
