@@ -105,8 +105,22 @@ export default function GaragePage() {
     })
       .then(res => res.json())
       .then(data => {
-        setVehicles(data);
-        if (data.length > 0) setSelectedVehicle(data[0]);
+        // Map backend fields to frontend camelCase
+        const mapped = data.map((v: any) => ({
+          id: v.id,
+          make: v.make,
+          model: v.model,
+          type: v.type,
+          year: String(v.year),
+          trim: v.trim,
+          fuelType: v.fuel_type,
+          tankCapacity: String(v.tank_capacity),
+          mpg: String(v.mpg),
+          currentMiles: String(v.current_miles),
+          fuelSide: v.fuel_side,
+        }));
+        setVehicles(mapped);
+        if (mapped.length > 0) setSelectedVehicle(mapped[0]);
       });
   }, []);
 

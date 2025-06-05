@@ -25,6 +25,7 @@ class VehicleListCreateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class VehicleDeleteView(APIView):
+    authentication_classes = [TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
     def delete(self, request, pk):
@@ -33,6 +34,7 @@ class VehicleDeleteView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class RefuelLogListCreateView(APIView):
+    authentication_classes = [TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, vehicle_id):
