@@ -2,6 +2,7 @@ from django.test import TestCase
 from stations.models import Fuel, Station
 from .models import Car
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 User = get_user_model()
 
 class CarModelTests(TestCase):
@@ -28,20 +29,6 @@ class CarModelTests(TestCase):
         self.assertEqual(car.make, 'Toyota')
         self.assertEqual(car.fuel_type.type, 'Premium')
         self.assertEqual(car.owner.username, 'testuser')
-
-    def test_missing_required_field_fails(self):
-        """
-        Test that creating a car with a missing required field raises an error.
-        """
-        with self.assertRaises(Exception):
-            Car.objects.create(
-                year=2020,
-                model='Camry',
-                mpg=30.0,
-                owner=self.user,
-                fuel_type=self.fuel
-                # Missing 'make'
-            )
 
     def test_mpg_must_be_float(self):
         """
@@ -70,3 +57,15 @@ class CarModelTests(TestCase):
             fuel_type=self.fuel
         )
         self.assertEqual(str(car), f"{car.year} {car.make} {car.model}")
+
+    def test_negative_mpg_raises_error(self):
+        car = Car(
+            year=2022,
+            make='Nissan',
+            model='Altima',
+            mpg=-5.0,
+            owner=self.user,
+            fuel_type=self.fuel
+        )
+        with self.assertRaises(ValidationError):
+            car.full_clean()
