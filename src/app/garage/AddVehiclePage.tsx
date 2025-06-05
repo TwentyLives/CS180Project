@@ -84,7 +84,7 @@ export default function AddVehiclePage() {
     setErrors((prev) => ({ ...prev, [name]: error }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: Partial<Record<keyof FormDataType, string>> = {};
 
@@ -98,26 +98,56 @@ export default function AddVehiclePage() {
       return;
     }
 
-    localStorage.setItem(`vehicle-${Date.now()}`, JSON.stringify(formData));
-    setSuccessMessage('✅ Add Vehicle Successfully!');
-    setShowSuccess(true);
-    setFormData({
-      make: '',
-      model: '',
-      type: 'Sedan',
-      year: '',
-      trim: '',
-      fuelType: 'Regular',
-      tankCapacity: '',
-      mpg: '',
-      fuelSide: 'Left',
-      currentMiles: '',
-    });
+    // Prepare payload (convert numeric fields)
+    const payload = {
+      ...formData,
+      year: Number(formData.year),
+      tank_capacity: Number(formData.tankCapacity),
+      mpg: Number(formData.mpg),
+      current_miles: Number(formData.currentMiles),
+      fuel_type: formData.fuelType,
+      fuel_side: formData.fuelSide,
+      type: formData.type,
+      trim: formData.trim,
+      make: formData.make,
+      model: formData.model,
+    };
 
-    setTimeout(() => {
-      setShowSuccess(false);
-      router.push('/garage');
-    }, 1200);
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/vehicles/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // if using session/cookie auth
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        setSuccessMessage('✅ Add Vehicle Successfully!');
+        setShowSuccess(true);
+        setFormData({
+          make: '',
+          model: '',
+          type: 'Sedan',
+          year: '',
+          trim: '',
+          fuelType: 'Regular',
+          tankCapacity: '',
+          mpg: '',
+          fuelSide: 'Left',
+          currentMiles: '',
+        });
+
+        setTimeout(() => {
+          setShowSuccess(false);
+          router.push('/garage');
+        }, 1200);
+      } else {
+        const errorData = await res.json();
+        setErrors({ make: errorData.detail || "Failed to add vehicle." });
+      }
+    } catch (err) {
+      setErrors({ make: "Network error. Please try again." });
+    }
   };
 
   return (

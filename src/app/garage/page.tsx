@@ -23,132 +23,25 @@ interface GarageVehicle {
   fuelType: string;
   tankCapacity: string;
   mpg: string;
+  currentMiles: string;
   fuelSide: string;
 }
 
 interface RefuelLog {
-  carId: string;
+  id: string;
+  vehicle: string;
   date: string; // YYYY-MM-DD
+  gas_type: string;
   gallons: number;
   cost: number;
   odometer: number;
+  created_at: string;
 }
-
-const refuelLogs: RefuelLog[] = [
-  { carId: '1', date: '2025-05-26', gallons: 10, cost: 45, odometer: 12000 },
-  { carId: '1', date: '2025-05-30', gallons: 12, cost: 50, odometer: 12400 },
-  { carId: '1', date: '2025-06-02', gallons: 11, cost: 48, odometer: 12730 },
-];
-
-function calculateAverageMPG(carId: string): number | null {
-  const logs = refuelLogs.filter((log) => log.carId === carId);
-  if (logs.length < 2) return null;
-
-  const sorted = logs.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  let totalMiles = 0;
-  let totalGallons = 0;
-
-  for (let i = 1; i < sorted.length; i++) {
-    const miles = sorted[i].odometer - sorted[i - 1].odometer;
-    totalMiles += miles;
-    totalGallons += sorted[i].gallons;
-  }
-  return parseFloat((totalMiles / totalGallons).toFixed(1));
-}
-
-function calculateTotalMiles(carId: string): number {
-  const logs = refuelLogs.filter((log) => log.carId === carId);
-  if (logs.length < 2) return 0;
-  const sorted = logs.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  return sorted[sorted.length - 1].odometer - sorted[0].odometer;
-}
-
-function findMostDrivenCarId(): string {
-  if (vehicles.length === 1) return vehicles[0].id;
-
-  let maxMiles = -1;
-  let mostDrivenId = '';
-  for (const v of vehicles) {
-    const miles = calculateTotalMiles(v.id);
-    if (miles > maxMiles) {
-      maxMiles = miles;
-      mostDrivenId = v.id;
-    }
-  }
-  return mostDrivenId;
-}
-
-function generateMPGHistory(carId: string) {
-  const logs = refuelLogs.filter((log) => log.carId === carId);
-  const sorted = logs.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  const history = [];
-  for (let i = 1; i < sorted.length; i++) {
-    const mpg = (sorted[i].odometer - sorted[i - 1].odometer) / sorted[i].gallons;
-    history.push({ date: sorted[i].date.slice(5), mpg: parseFloat(mpg.toFixed(1)) });
-  }
-  return history;
-}
-
-function calculateMonthlyCost(carId: string): number {
-  const logs = refuelLogs.filter((log) => log.carId === carId);
-  const currentMonth = new Date().getMonth();
-  const thisMonthLogs = logs.filter((log) => new Date(log.date).getMonth() === currentMonth);
-  return thisMonthLogs.reduce((sum, log) => sum + log.cost, 0);
-}
-
-function getTrendArrow(current: number, previous: number) {
-  if (current > previous) return '📉';
-  if (current < previous) return '📈';
-  return '➖';
-}
-
-function getConsumptionLabel(mpg: number) {
-  if (mpg < 19) return { color: 'bg-red-500', text: 'Gas guzzler zone 🔥' };
-  if (mpg <= 30) return { color: 'bg-yellow-400', text: 'Normal driving pattern 🚗' };
-  return { color: 'bg-green-500', text: 'Fuel efficient warrior 🍃' };
-}
-
-const vehicles: GarageVehicle[] = [
-  {
-    id: '1',
-    make: 'Toyota',
-    model: 'Camry',
-    type: 'Sedan',
-    year: '2018',
-    trim: 'XLE',
-    fuelType: 'Premium',
-    tankCapacity: '15.9 gal',
-    mpg: '28',
-    fuelSide: 'Left',
-  },
-  {
-    id: '2',
-    make: 'Honda',
-    model: 'CR-V',
-    type: 'SUV',
-    year: '2020',
-    trim: 'EX-L',
-    fuelType: 'Regular',
-    tankCapacity: '14.0 gal',
-    mpg: '30',
-    fuelSide: 'Right',
-  },
-  {
-    id: '3',
-    make: 'Ford',
-    model: 'Transit',
-    type: 'Van',
-    year: '2021',
-    trim: 'XLT',
-    fuelType: 'Diesel',
-    tankCapacity: '25.0 gal',
-    mpg: '20',
-    fuelSide: 'Left',
-  },
-];
 
 export default function GaragePage() {
-  const [selectedVehicle, setSelectedVehicle] = useState<GarageVehicle>(vehicles[0]);
+  const [vehicles, setVehicles] = useState<GarageVehicle[]>([]);
+  const [selectedVehicle, setSelectedVehicle] = useState<GarageVehicle | null>(null);
+  const [refuelLogs, setRefuelLogs] = useState<RefuelLog[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [openUpward, setOpenUpward] = useState(false);
@@ -164,7 +57,7 @@ export default function GaragePage() {
   const toggleProfileMenu = () => setProfileMenuOpen(!profileMenuOpen);
 
   const selectVehicle = (v: GarageVehicle) => {
-    if (v.id === selectedVehicle.id) return;
+    if (v.id === selectedVehicle?.id) return;
     setIsChanging(true);
     setTimeout(() => {
       setSelectedVehicle(v);
@@ -194,15 +87,155 @@ export default function GaragePage() {
     }
   }, [isOpen]);
 
-  const mpg = calculateAverageMPG(selectedVehicle.id);
-  const cost = calculateMonthlyCost(selectedVehicle.id);
+  // Fetch vehicles on mount
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/vehicles/", {
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then(res => res.json())
+      .then(data => {
+        setVehicles(data);
+        if (data.length > 0) setSelectedVehicle(data[0]);
+      });
+  }, []);
+
+  // Fetch refuel logs when selectedVehicle changes
+  useEffect(() => {
+    if (!selectedVehicle) return;
+    fetch(`http://127.0.0.1:8000/api/refuel/${selectedVehicle.id}/`, {
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then(res => res.json())
+      .then(data => setRefuelLogs(data));
+  }, [selectedVehicle]);
+
+  const mpg = calculateAverageMPG(selectedVehicle?.id);
+  const cost = calculateMonthlyCost(selectedVehicle?.id);
   const previousMPG = 27.2;
   const trendArrow = mpg ? getTrendArrow(mpg, previousMPG) : '–';
-  const consumption = getConsumptionLabel(mpg || parseFloat(selectedVehicle.mpg));
-  const mpgHistory = generateMPGHistory(selectedVehicle.id);
-  const totalMiles = calculateTotalMiles(selectedVehicle.id);
+  const consumption = getConsumptionLabel(mpg || parseFloat(selectedVehicle?.mpg ?? "0"));
+  const mpgHistory = generateMPGHistory(selectedVehicle?.id);
+  const totalMiles = calculateTotalMiles(selectedVehicle?.id);
   const router = useRouter();
   const mostDrivenCarId = findMostDrivenCarId();
+
+  const handleLogRefuel = async (data: { gasType: string; gallons: number; cost: number }) => {
+    if (!selectedVehicle) return;
+    const payload = {
+      gas_type: data.gasType,
+      gallons: data.gallons,
+      cost: data.cost,
+      date: new Date().toISOString().slice(0, 10),
+      odometer: Number(selectedVehicle.currentMiles), // or get from user input
+    };
+    const res = await fetch(`http://127.0.0.1:8000/api/refuel/${selectedVehicle.id}/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) {
+      setToastMessage("Refuel logged successfully ✅");
+      // Refresh logs
+      const logs = await fetch(`http://127.0.0.1:8000/api/refuel/${selectedVehicle.id}/`, {
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      }).then(r => r.json());
+      setRefuelLogs(logs);
+    } else {
+      setToastMessage("Failed to log refuel.");
+    }
+  };
+
+  function calculateAverageMPG(carId: string | undefined): number | null {
+    if (!carId) return null;
+    const logs = refuelLogs.filter((log) => log.vehicle === carId);
+    if (logs.length < 2) return null;
+
+    const sorted = logs.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    let totalMiles = 0;
+    let totalGallons = 0;
+
+    for (let i = 1; i < sorted.length; i++) {
+      const miles = sorted[i].odometer - sorted[i - 1].odometer;
+      totalMiles += miles;
+      totalGallons += sorted[i].gallons;
+    }
+    return parseFloat((totalMiles / totalGallons).toFixed(1));
+  }
+
+  function calculateTotalMiles(carId: string | undefined): number {
+    if (!carId) return 0;
+    const logs = refuelLogs.filter((log) => log.vehicle === carId);
+    if (logs.length < 2) return 0;
+    const sorted = logs.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    return sorted[sorted.length - 1].odometer - sorted[0].odometer;
+  }
+
+  function findMostDrivenCarId(): string {
+    if (vehicles.length === 1) return vehicles[0].id;
+
+    let maxMiles = -1;
+    let mostDrivenId = '';
+    for (const v of vehicles) {
+      const miles = calculateTotalMiles(v.id);
+      if (miles > maxMiles) {
+        maxMiles = miles;
+        mostDrivenId = v.id;
+      }
+    }
+    return mostDrivenId;
+  }
+
+  function generateMPGHistory(carId: string | undefined) {
+    if (!carId) return [];
+    const logs = refuelLogs.filter((log) => log.vehicle === carId);
+    const sorted = logs.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const history = [];
+    for (let i = 1; i < sorted.length; i++) {
+      const mpg = (sorted[i].odometer - sorted[i - 1].odometer) / sorted[i].gallons;
+      history.push({ date: sorted[i].date.slice(5), mpg: parseFloat(mpg.toFixed(1)) });
+    }
+    return history;
+  }
+
+  function calculateMonthlyCost(carId: string | undefined): number {
+    if (!carId) return 0;
+    const logs = refuelLogs.filter((log) => log.vehicle === carId);
+    const currentMonth = new Date().getMonth();
+    const thisMonthLogs = logs.filter((log) => new Date(log.date).getMonth() === currentMonth);
+    return thisMonthLogs.reduce((sum, log) => sum + log.cost, 0);
+  }
+
+  function getTrendArrow(current: number, previous: number) {
+    if (current > previous) return '📉';
+    if (current < previous) return '📈';
+    return '➖';
+  }
+
+  function getConsumptionLabel(mpg: number) {
+    if (mpg < 19) return { color: 'bg-red-500', text: 'Gas guzzler zone 🔥' };
+    if (mpg <= 30) return { color: 'bg-yellow-400', text: 'Normal driving pattern 🚗' };
+    return { color: 'bg-green-500', text: 'Fuel efficient warrior 🍃' };
+  }
+
+  if (!vehicles.length) {
+    return (
+      <main className="flex items-center justify-center min-h-screen">
+        <div>No vehicles found. Add a vehicle to get started.</div>
+      </main>
+    );
+  }
+
+  if (!selectedVehicle) {
+    return (
+      <main className="flex items-center justify-center min-h-screen">
+        <div>Loading...</div>
+      </main>
+    );
+  }
 
   return (
     <main className="relative font-['IBM_Plex_Sans'] bg-gradient-to-br from-[#f2f5f2] via-[#e0e8e0] to-[#d8e8d8] text-black min-h-screen p-6 space-y-6 overflow-hidden">
@@ -307,13 +340,9 @@ export default function GaragePage() {
 <LogRefuelModal
   isOpen={showRefuelModal}
   onClose={() => setShowRefuelModal(false)}
-  onSubmit={(data) => {
-    console.log("Refuel data submitted for car:", selectedVehicle.id);
-    console.log(data);
-    setToastMessage("Refuel logged successfully ✅");
-  }}
+  onSubmit={handleLogRefuel}
 />
-{toastMessage && <Toast message={toastMessage} onClose={() => setToastMessage('')} />} 
+{toastMessage && <Toast message={toastMessage} onClose={() => setToastMessage('')} />}
     </main>
   );
 }
