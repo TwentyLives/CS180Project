@@ -17,19 +17,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-# from register import views as register_views
-# from garage import views as garage_views
-# from map import views as map_views
 from register.views import RegisterAPI, LoginAPI
 from register.views import TotalUsersAPI
+from register.views import UserInfoAPI
 from stations.views import GasPriceSubmitView, StationPricesView
 from garage.views import VehicleListCreateView, VehicleDeleteView, RefuelLogListCreateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('register/', register_views.register, name='register'),
-    # path('garage/', garage_views.garage, name='garage'),
-    # path('map/', map_views.map, name='map'),
     path('api/register/', RegisterAPI.as_view(), name='api-register'),
     path('api/login/', LoginAPI.as_view(), name='api-login'),
     path("api/total-users", TotalUsersAPI.as_view(), name="total-users"),
@@ -38,4 +33,5 @@ urlpatterns = [
     path('api/vehicles/', VehicleListCreateView.as_view(), name='vehicle-list-create'),
     path('api/vehicles/<uuid:pk>/', VehicleDeleteView.as_view(), name='vehicle-delete'),
     path('api/refuel/<uuid:vehicle_id>/', RefuelLogListCreateView.as_view(), name='refuel-log-list-create'),
+    path('api/userinfo/', UserInfoAPI.as_view(), name='userinfo'),
 ]

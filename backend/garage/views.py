@@ -6,8 +6,10 @@ from .models import Vehicle, RefuelLog
 from django.contrib.auth.models import User
 from rest_framework.decorators import api_view, permission_classes
 from .serializers import VehicleSerializer, RefuelLogSerializer
+from rest_framework.authentication import TokenAuthentication
 
 class VehicleListCreateView(APIView):
+    authentication_classes = [TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):

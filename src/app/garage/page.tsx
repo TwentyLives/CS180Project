@@ -88,9 +88,20 @@ export default function GaragePage() {
   }, [isOpen]);
 
   useEffect(() => {
+    // Helper to get token from cookie
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+      return null;
+    };
+
+    const token = getCookie("token");
     fetch("http://127.0.0.1:8000/api/vehicles/", {
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { "Authorization": `Token ${token}` } : {}),
+      },
     })
       .then(res => res.json())
       .then(data => {
@@ -102,11 +113,17 @@ export default function GaragePage() {
   useEffect(() => {
     if (!selectedVehicle) return;
     fetch(`http://127.0.0.1:8000/api/refuel/${selectedVehicle.id}/`, {
-      credentials: "include",
       headers: { "Content-Type": "application/json" },
+      // remove credentials: "include" if using token auth!
     })
       .then(res => res.json())
-      .then(data => setRefuelLogs(data));
+      .then(data => {
+        if (Array.isArray(data)) {
+          setRefuelLogs(data);
+        } else {
+          setRefuelLogs([]); // fallback if API returns error object
+        }
+      });
   }, [selectedVehicle]);
 
   const mpg = calculateAverageMPG(selectedVehicle?.id);
@@ -177,6 +194,7 @@ export default function GaragePage() {
   }
 
   function findMostDrivenCarId(): string {
+    if (!Array.isArray(vehicles) || vehicles.length === 0) return '';
     if (vehicles.length === 1) return vehicles[0].id;
 
     let maxMiles = -1;
@@ -250,7 +268,7 @@ export default function GaragePage() {
   return (
     <main className="relative font-['IBM_Plex_Sans'] bg-gradient-to-br from-[#f2f5f2] via-[#e0e8e0] to-[#d8e8d8] text-black min-h-screen p-6 space-y-6 overflow-hidden">
       <div className="flex justify-between items-center z-10 relative">
-        <UserTitle username="User" />
+        <UserTitle />
         <div className="flex items-center space-x-4">
           <div ref={dropdownRef} className="relative">
             <button

@@ -9,9 +9,33 @@ const Dash: React.FC = () => {
   const [loginData, setLoginData] = useState<LoginData | null>(null);
 
   useEffect(() => {
-    const stored = sessionStorage.getItem("loginData");
-    if (stored) {
-      setLoginData(JSON.parse(stored));
+    // Try to get login info from cookie
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+      return null;
+    };
+
+    // Example: If you store a token, you might want to fetch user info from backend
+    const token = getCookie("token");
+    if (token) {
+      // Fetch user info using the token
+      fetch("http://127.0.0.1:8000/api/userinfo/", {
+        method: "GET",
+        headers: {
+          "Authorization": `Token ${token}`,
+        },
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.username) {
+            setLoginData({ username: data.username });
+          }
+        })
+        .catch(() => setLoginData(null));
+    } else {
+      setLoginData(null);
     }
   }, []);
 

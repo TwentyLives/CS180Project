@@ -114,10 +114,21 @@ export default function AddVehiclePage() {
     };
 
     try {
+      // Helper to get token from cookie
+      const getCookie = (name: string) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop()?.split(';').shift();
+        return null;
+      };
+
+      const token = getCookie("token");
       const res = await fetch("http://127.0.0.1:8000/api/vehicles/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", // if using session/cookie auth
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Token ${token}` } : {}),
+        },
         body: JSON.stringify(payload),
       });
 
@@ -140,6 +151,7 @@ export default function AddVehiclePage() {
         setTimeout(() => {
           setShowSuccess(false);
           router.push('/garage');
+          router.refresh(); // Ensures the garage page fetches the latest vehicles
         }, 1200);
       } else {
         const errorData = await res.json();

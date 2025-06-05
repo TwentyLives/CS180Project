@@ -34,15 +34,18 @@ const Login = () => {
     };
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/login/", {
+      const loginResponse = await fetch("http://127.0.0.1:8000/api/login/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        sessionStorage.setItem("loginData", JSON.stringify(data));
+      const loginData = await loginResponse.json();
+
+      if (loginResponse.ok && loginData.token) {
+        document.cookie = `token=${loginData.token}; path=/;`;
         setToastMessage("Login successful!");
         setToastColor("green");
 

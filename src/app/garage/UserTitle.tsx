@@ -1,12 +1,36 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
-interface UserTitleProps {
-  username: string;
-}
+export default function UserTitle() {
+  const [username, setUsername] = useState<string>('User');
 
-export default function UserTitle({ username }: UserTitleProps) {
+  useEffect(() => {
+    // Helper to get token from cookie
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+      return null;
+    };
+
+    const token = getCookie('token');
+    if (token) {
+      fetch('http://127.0.0.1:8000/api/userinfo/', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Token ${token}`,
+        },
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.username) setUsername(data.username);
+        })
+        .catch(() => setUsername('User'));
+    }
+  }, []);
+
   const isLong = username.length > 10;
 
   return (
