@@ -1,71 +1,102 @@
 from django.test import TestCase
-from stations.models import Fuel, Station
-from .models import Car
+from django.db import IntegrityError
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from .models import Vehicle, RefuelLog
+from datetime import date
+
 User = get_user_model()
 
-class CarModelTests(TestCase):
+class VehicleModelTests(TestCase):
     def setUp(self):
-        # Create a user and a fuel type for testing
         self.user = User.objects.create_user(username='testuser', password='securepass123')
-        # create a station first
-        self.station = Station.objects.create(name="Test Station", user=self.user)
-        # now create fuel with station reference
-        self.fuel = Fuel.objects.create(station=self.station, type='Premium', price=3.59)
 
-    def test_create_car_successfully(self):
-        """
-        Test that a car can be created with valid fields.
-        """
-        car = Car.objects.create(
-            year=2020,
+    def test_create_vehicle_successfully(self):
+        vehicle = Vehicle.objects.create(
+            user=self.user,
             make='Toyota',
             model='Camry',
+            type='Sedan',
+            year=2020,
+            trim='LE',
+            fuel_type='Regular',
+            fuel_side='Left',
+            tank_capacity=15.5,
             mpg=30.0,
-            owner=self.user,
-            fuel_type=self.fuel
+            current_miles=50000
         )
-        self.assertEqual(car.make, 'Toyota')
-        self.assertEqual(car.fuel_type.type, 'Premium')
-        self.assertEqual(car.owner.username, 'testuser')
+        self.assertEqual(str(vehicle), "2020 Toyota Camry")
+        self.assertEqual(vehicle.user.username, 'testuser')
 
-    def test_mpg_must_be_float(self):
-        """
-        Test that mpg must be a float — simulate incorrect data type usage.
-        """
-        with self.assertRaises(ValueError):
-            Car.objects.create(
-                year=2020,
-                make='Honda',
-                model='Accord',
-                mpg='thirty',  # Invalid type
-                owner=self.user,
-                fuel_type=self.fuel
-            )
-
-    def test_car_string_representation(self):
-        """
-        Optional: Add a __str__ to Car and test it here.
-        """
-        car = Car.objects.create(
-            year=2022,
-            make='Ford',
-            model='Escape',
-            mpg=27.0,
-            owner=self.user,
-            fuel_type=self.fuel
-        )
-        self.assertEqual(str(car), f"{car.year} {car.make} {car.model}")
-
-    def test_negative_mpg_raises_error(self):
-        car = Car(
-            year=2022,
-            make='Nissan',
-            model='Altima',
-            mpg=-5.0,
-            owner=self.user,
-            fuel_type=self.fuel
+    def test_negative_mpg_raises_validation_error(self):
+        vehicle = Vehicle(
+            user=self.user,
+            make='Honda',
+            model='Civic',
+            type='Sedan',
+            year=2021,
+            trim='EX',
+            fuel_type='Regular',
+            fuel_side='Right',
+            tank_capacity=13.0,
+            mpg=-25.0,
+            current_miles=25000
         )
         with self.assertRaises(ValidationError):
-            car.full_clean()
+            vehicle.full_clean()
+
+    def test_string_representation(self):
+        vehicle = Vehicle.objects.create(
+            user=self.user,
+            make='Ford',
+            model='Escape',
+            type='SUV',
+            year=2022,
+            trim='SE',
+            fuel_type='Premium',
+            fuel_side='Right',
+            tank_capacity=16.0,
+            mpg=28.0,
+            current_miles=10000
+        )
+        self.assertEqual(str(vehicle), "2022 Ford Escape")
+
+
+class RefuelLogModelTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='securepass123')
+        self.vehicle = Vehicle.objects.create(
+            user=self.user,
+            make='Toyota',
+            model='RAV4',
+            type='SUV',
+            year=2023,
+            trim='XLE',
+            fuel_type='Regular',
+            fuel_side='Left',
+            tank_capacity=14.8,
+            mpg=32.0,
+            current_miles=1500
+        )
+
+    def test_create_refuel_log_successfully(self):
+        log = RefuelLog.objects.create(
+            vehicle=self.vehicle,
+            date=date.today(),
+            gas_type='Regular',
+            gallons=10.5,
+            cost=42.00,
+            odometer=1520
+        )
+        self.assertEqual(str(log), f"Refuel Regular on {log.date} for {self.vehicle}")
+
+    def test_refuel_log_requires_vehicle(self):
+        with self.assertRaises(IntegrityError):
+            RefuelLog.objects.create(
+                vehicle=None,
+                date=date.today(),
+                gas_type='Premium',
+                gallons=8.0,
+                cost=35.00,
+                odometer=1600
+            )

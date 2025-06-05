@@ -74,5 +74,6 @@ backend/register/migrations/0002_delete_user.py
 backend/register/migrations/__pycache__/0002_delete_user.cpython-312.pyc
 backend/stations/migrations/0001_initial.py
 backend/map/__pycache__/tests.cpython-312.pyc
+backend/garage/migrations/0002_alter_vehicle_mpg.py
 __pycache__/
 *.pyc
