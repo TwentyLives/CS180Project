@@ -8,6 +8,21 @@
   --font-mono: 'Geist Mono', monospace;
 }
 
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
 body {
   @apply antialiased;
   background: var(--background);
@@ -18,4 +33,154 @@ body {
 html {
   scroll-behavior: smooth;
 }
-  
+
+@keyframes floating {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(4px, -10px); }
+  50% { transform: translate(0, -16px); }
+  75% { transform: translate(-4px, -10px); }
+  100% { transform: translate(0, 0); }
+}
+
+.animate-floating {
+  animation: floating 6s ease-in-out infinite;
+}
+
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeOutShrink {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+.fade-out-shrink {
+  animation: fadeOutShrink 0.4s ease-out forwards;
+}
+
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-pop-in {
+  animation: pop-in 0.6s ease-out both;
+}
+
+@keyframes pop-in-spacing {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+    letter-spacing: 0.2em;
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+    letter-spacing: 0.05em;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    letter-spacing: 0em;
+  }
+}
+
+.animate-pop-in-spacing {
+  animation: pop-in-spacing 0.8s ease-out both;
+}
+
+@keyframes tighten-spacing {
+  0% {
+    letter-spacing: 0.2em;
+  }
+  100% {
+    letter-spacing: 0em;
+  }
+}
+
+.animate-tighten-spacing {
+  animation: tighten-spacing 0.8s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-delay {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes fadeInFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+  }
+}
+
+.animate-fade-in-float {
+  animation: fadeInFloat 1s ease-out forwards;
+}
+
+@keyframes gentleFloating {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-gentle-floating {
+  animation: gentleFloating 5s ease-in-out infinite;
+}
+
+@keyframes fade-in-out {
+  0% { opacity: 0; transform: translateY(10px); }
+  10%, 90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(10px); }
+}
+
+.animate-fade-in-out {
+  animation: fade-in-out 3s ease-in-out forwards;
+}

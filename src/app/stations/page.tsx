@@ -5,7 +5,7 @@ import Footer from "../../components/footer";
 import dynamic from "next/dynamic";
 
 // Dynamically import LocationComponent with SSR disabled
-const Location = dynamic(() => import("../../components/geolocation/LocationComponent"), {
+const Location = dynamic(() => import("../../app/geolocation/LocationComponent"), {
   ssr: false,
 });
 
