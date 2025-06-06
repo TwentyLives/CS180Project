@@ -77,7 +77,14 @@ const Recommends: React.FC = () => {
             distance: haversineDistance(userLat, userLon, el.lat, el.lon),
           }));
 
-          const mergedStations: GasStation[] = rawNearbyStations.map((raw) => {
+          const mergedStations: GasStation[] = rawNearbyStations.map((raw: {
+            id: number;
+            name: string;
+            brand: string;
+            lat: number;
+            lon: number;
+            distance: number;
+          }) => {
             const match = priceData.find((s: any) => {
               const dist = haversineDistance(raw.lat, raw.lon, s.lat, s.lon);
               return dist < 50;

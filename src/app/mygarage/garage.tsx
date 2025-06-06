@@ -240,7 +240,6 @@ function calculateTotalMiles(carId: string | undefined): number {
 
   const totalSpent = logs.reduce((sum, log) => sum + log.cost, 0);
 
-  // $4 → 30 miles → $1 = 7.5 miles
   const miles = totalSpent * 7.5;
 
   return Math.round(miles);
