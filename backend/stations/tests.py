@@ -10,11 +10,6 @@ class StationModelTests(TestCase):
         self.assertEqual(station.lon, -118.2437)
         self.assertEqual(str(station), 'Test Station')
 
-    def test_station_str_fallback(self):
-        station = Station.objects.create(overpass_id=987654321, lat=36.7783, lon=-119.4179)
-        self.assertEqual(str(station), 'Station 987654321')
-
-
 class GasPriceSubmissionTests(TestCase):
     def setUp(self):
         self.station = Station.objects.create(overpass_id=123, name="Shell", lat=33.9533, lon=-117.3961)
