@@ -53,9 +53,3 @@ class UserInfoAPI(APIView):
             "email": user.email,
             # Add more fields if needed
         }, status=status.HTTP_200_OK)
-    
-# from django.contrib.auth.models import User (I know im working in your code so if we ever merge i need this library)
-class TotalUsersAPI(APIView):
-    def get(self, request):
-        total_users = User.objects.count()
-        return Response({"total_users": total_users}, status=status.HTTP_200_OK)        

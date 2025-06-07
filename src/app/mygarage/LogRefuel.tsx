@@ -109,8 +109,9 @@ export default function LogRefuelModal({ isOpen, onClose, onSubmit }: Props) {
 
         {/* Gas Type */}
         <div>
-          <label className="block mb-1 text-sm text-gray-700">Gas Type</label>
+          <label htmlFor='gasType' className="block mb-1 text-sm text-gray-700">Gas Type</label>
           <select
+            id='gasType'
             value={gasType}
             onChange={(e) => setGasType(e.target.value)}
             className="w-full rounded-xl border border-gray-300 bg-white/60 backdrop-blur-md p-2 text-gray-800"
@@ -123,8 +124,9 @@ export default function LogRefuelModal({ isOpen, onClose, onSubmit }: Props) {
 
         {/* Gallons Added */}
         <div>
-          <label className="block mb-1 text-sm text-gray-700">Gallons Added</label>
+          <label htmlFor='gallons' className="block mb-1 text-sm text-gray-700">Gallons Added</label>
           <input
+            id='gallons'
             type="text"
             value={gallons}
             onChange={(e) => {
@@ -144,8 +146,9 @@ export default function LogRefuelModal({ isOpen, onClose, onSubmit }: Props) {
 
         {/* Money Spent */}
         <div>
-          <label className="block mb-1 text-sm text-gray-700">Money Spent ($)</label>
+          <label htmlFor='cost' className="block mb-1 text-sm text-gray-700">Money Spent ($)</label>
           <input
+            id='cost'
             type="text"
             value={cost}
             onChange={(e) => {

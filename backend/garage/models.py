@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator
 from django.contrib.auth.models import User
 import uuid
 
@@ -29,7 +30,7 @@ class Vehicle(models.Model):
     fuel_type = models.CharField(max_length=8, choices=FUEL_TYPE_CHOICES)
     fuel_side = models.CharField(max_length=5, choices=FUEL_SIDE_CHOICES)
     tank_capacity = models.FloatField()
-    mpg = models.FloatField()
+    mpg = models.FloatField(validators=[MinValueValidator(0.0)])
     current_miles = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
 
